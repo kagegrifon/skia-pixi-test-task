@@ -4,6 +4,7 @@ import { SkiaCanvas } from "./components/SkiaCanvas";
 import * as PIXI from "pixi.js-legacy";
 import { switchScene } from "./pixi/DemoScene";
 import { useRef, useState } from "react";
+import { addRandomShape } from "./pixi/addRandomShape";
 
 export function App() {
   const pixiAppRef = useRef<PIXI.Application>(null);
@@ -25,6 +26,7 @@ export function App() {
             setIsloading(isLoading),
           )
         }
+        onAddRandom={() => addRandomShape(pixiAppRef.current!.stage)}
         isLoadingScene={isLoading}
       />
       <div className="status">

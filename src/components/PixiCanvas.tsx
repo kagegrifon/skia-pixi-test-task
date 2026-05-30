@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { usePixiApp } from "../hooks/usePixiApp";
 import * as PIXI from "pixi.js-legacy";
+import { CANVAS_SIZE } from "../constans";
 
 export function PixiCanvas({
   onMount,
@@ -18,8 +19,8 @@ export function PixiCanvas({
 
   return (
     <canvas
-      width={400}
-      height={300}
+      width={CANVAS_SIZE.width}
+      height={CANVAS_SIZE.height}
       ref={ref}
       style={{ border: "1px solid gray" }}
     />
