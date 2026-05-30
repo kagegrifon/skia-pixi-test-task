@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "canvaskit-wasm": "^0.41.1",
+    "pixi.js-legacy": "^7.2.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
