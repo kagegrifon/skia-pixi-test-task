@@ -1,10 +1,20 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { usePixiApp } from "../hooks/usePixiApp";
+import * as PIXI from "pixi.js-legacy";
 
-export function PixiCanvas() {
+export function PixiCanvas({
+  onMount,
+}: {
+  onMount: (pixiApp: PIXI.Application) => void;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
-
   const appRef = usePixiApp(ref);
+
+  useEffect(() => {
+    if (appRef.current) {
+      onMount(appRef.current);
+    }
+  }, [appRef, onMount]);
 
   return (
     <canvas

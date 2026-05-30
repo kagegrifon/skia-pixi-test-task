@@ -1,16 +1,34 @@
 import { Controls } from "./components/Controls";
 import { PixiCanvas } from "./components/PixiCanvas";
 import { SkiaCanvas } from "./components/SkiaCanvas";
+import * as PIXI from "pixi.js-legacy";
+import { switchScene } from "./pixi/DemoScene";
+import { useRef, useState } from "react";
 
 export function App() {
+  const pixiAppRef = useRef<PIXI.Application>(null);
+  const [isLoading, setIsloading] = useState(false);
+
   return (
     <div className="app">
       <div className="canvases">
-        <PixiCanvas />
+        <PixiCanvas
+          onMount={(pixiApp) => {
+            pixiAppRef.current = pixiApp;
+          }}
+        />
         <SkiaCanvas />
       </div>
-      <Controls />
+      <Controls
+        onChangeScene={() =>
+          switchScene(pixiAppRef.current!.stage, (isLoading) =>
+            setIsloading(isLoading),
+          )
+        }
+        isLoadingScene={isLoading}
+      />
       <div className="status">
+        {isLoading && <div>Загружаем картинку для pixi...</div>}
         {/* статус: загрузка wasm, последнее событие */}
       </div>
     </div>
