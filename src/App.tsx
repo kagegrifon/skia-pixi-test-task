@@ -1,32 +1,26 @@
 import { Controls } from "./components/Controls";
 import { PixiCanvas } from "./components/PixiCanvas";
 import { SkiaCanvas } from "./components/SkiaCanvas";
-import * as PIXI from "pixi.js-legacy";
 import { switchScene } from "./pixi/DemoScene";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { addRandomShape } from "./pixi/addRandomShape";
+import { usePixiApp } from "./hooks/usePixiApp";
 
 export function App() {
-  const pixiAppRef = useRef<PIXI.Application>(null);
   const [isLoading, setIsloading] = useState(false);
+  const pixiApp = usePixiApp((s) => s.pixiApp);
 
   return (
     <div className="app">
       <div className="canvases">
-        <PixiCanvas
-          onMount={(pixiApp) => {
-            pixiAppRef.current = pixiApp;
-          }}
-        />
+        <PixiCanvas />
         <SkiaCanvas />
       </div>
       <Controls
         onChangeScene={() =>
-          switchScene(pixiAppRef.current!.stage, (isLoading) =>
-            setIsloading(isLoading),
-          )
+          switchScene(pixiApp!.stage, (isLoading) => setIsloading(isLoading))
         }
-        onAddRandom={() => addRandomShape(pixiAppRef.current!.stage)}
+        onAddRandom={() => addRandomShape(pixiApp!.stage)}
         isLoadingScene={isLoading}
       />
       <div className="status">
