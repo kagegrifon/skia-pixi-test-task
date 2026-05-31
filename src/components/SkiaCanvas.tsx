@@ -28,6 +28,9 @@ export function SkiaCanvas() {
 
   useEffect(() => {
     if (!skiaReady || !pixiApp) return;
+    // Форсируем рендер Pixi, чтобы финализировать currentPath во всех Graphics
+    // (moveTo/lineTo не попадают в graphicsData до рендера Pixi)
+    pixiApp.renderer.render(pixiApp.stage);
     convertPixiContainerToSkia(pixiApp.stage);
   }, [skiaReady, pixiApp, sceneVersion]);
 

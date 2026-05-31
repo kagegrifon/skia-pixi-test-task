@@ -1,20 +1,6 @@
 import type { Canvas, CanvasKit } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 
-function imageElementToPngBytes(img: HTMLImageElement): Uint8Array {
-  const offscreen = document.createElement("canvas");
-  offscreen.width = img.naturalWidth;
-  offscreen.height = img.naturalHeight;
-  const ctx = offscreen.getContext("2d")!;
-  ctx.drawImage(img, 0, 0);
-  const dataUrl = offscreen.toDataURL("image/png");
-  const base64 = dataUrl.split(",")[1];
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
 export function renderSprite(
   CK: CanvasKit,
   canvas: Canvas,
@@ -23,17 +9,35 @@ export function renderSprite(
   const resource = sprite.texture?.baseTexture?.resource;
   if (!(resource instanceof PIXI.BaseImageResource)) return;
   const src = resource.source;
-  if (!(src instanceof HTMLImageElement)) return;
-  const bytes = imageElementToPngBytes(src);
-  const img = CK.MakeImageFromEncoded(bytes);
+
+  let img: ReturnType<typeof CK.MakeImageFromCanvasImageSource> | null = null;
+
+  if (src instanceof HTMLImageElement) {
+    // HTMLImageElement нельзя передавать напрямую — рисуем через offscreen canvas
+    const offscreen = document.createElement("canvas");
+    offscreen.width = src.naturalWidth;
+    offscreen.height = src.naturalHeight;
+    offscreen.getContext("2d")!.drawImage(src, 0, 0);
+    img = CK.MakeImageFromCanvasImageSource(offscreen);
+  } else if (src instanceof ImageBitmap) {
+    // ImageBitmap — валидный CanvasImageSource, принимается напрямую
+    img = CK.MakeImageFromCanvasImageSource(src);
+  }
+
   if (!img) return;
-  const ax = -sprite.width * sprite.anchor.x; // учёт anchor (по умолч. 0,0)
-  const ay = -sprite.height * sprite.anchor.y;
+
+  // worldTransform уже включает sprite.scale, поэтому рисуем по натуральным
+  // размерам текстуры — иначе scale применится дважды.
+  const texW = img.width();
+  const texH = img.height();
+  const ax = -texW * sprite.anchor.x;
+  const ay = -texH * sprite.anchor.y;
+
   const paint = new CK.Paint();
   canvas.drawImageRect(
     img,
-    CK.XYWHRect(0, 0, img.width(), img.height()),
-    CK.XYWHRect(ax, ay, sprite.width, sprite.height),
+    CK.XYWHRect(0, 0, texW, texH),
+    CK.XYWHRect(ax, ay, texW, texH),
     paint,
   );
   paint.delete();

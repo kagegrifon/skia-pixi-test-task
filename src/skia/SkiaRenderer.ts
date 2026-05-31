@@ -1,4 +1,8 @@
-import CanvasKitInit, { type Canvas, type CanvasKit, type Surface } from "canvaskit-wasm";
+import CanvasKitInit, {
+  type Canvas,
+  type CanvasKit,
+  type Surface,
+} from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 import { makePaint } from "./skiaColor";
 import { renderSprite } from "./renderSprite";
@@ -115,20 +119,36 @@ function renderGraphics(ck: CanvasKit, canvas: Canvas, gfx: PIXI.Graphics) {
           ),
         );
         break;
-      case SHAPES.POLY:
-        builder.addPolygon(shape.points, shape.closeStroke ?? false);
+      case SHAPES.POLY: {
+        const pts = shape.points;
+        builder.moveTo(pts[0], pts[1]);
+        for (let i = 2; i < pts.length; i += 2) {
+          builder.lineTo(pts[i], pts[i + 1]);
+        }
+        if (shape.closeStroke) builder.close();
         break;
+      }
     }
 
     const path = builder.snapshot();
 
     if (fillStyle?.visible) {
-      const paint = makePaint(ck, fillStyle.color, fillStyle.alpha, ck.PaintStyle.Fill);
+      const paint = makePaint(
+        ck,
+        fillStyle.color,
+        fillStyle.alpha,
+        ck.PaintStyle.Fill,
+      );
       canvas.drawPath(path, paint);
       paint.delete();
     }
     if (lineStyle?.visible && lineStyle.width > 0) {
-      const paint = makePaint(ck, lineStyle.color, lineStyle.alpha, ck.PaintStyle.Stroke);
+      const paint = makePaint(
+        ck,
+        lineStyle.color,
+        lineStyle.alpha,
+        ck.PaintStyle.Stroke,
+      );
       paint.setStrokeWidth(lineStyle.width);
       canvas.drawPath(path, paint);
       paint.delete();
@@ -138,3 +158,4 @@ function renderGraphics(ck: CanvasKit, canvas: Canvas, gfx: PIXI.Graphics) {
     builder.delete();
   }
 }
+
