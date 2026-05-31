@@ -23,6 +23,11 @@ export function setupSkiaSurface(canvasId: string): void {
 
 export function convertPixiContainerToSkia(container: PIXI.Container): void {
   if (!CK || !surface) return;
+  // worldTransform обновляется Pixi во время render-loop (RAF).
+  // Если вызов происходит раньше RAF — обновляем вручную.
+  for (const child of container.children) {
+    if (child.visible) child.updateTransform();
+  }
   const canvas = surface.getCanvas();
   canvas.clear(CK.Color4f(0.94, 0.94, 0.94, 1));
   renderContainer(CK, canvas, container);
