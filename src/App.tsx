@@ -5,17 +5,21 @@ import { addRandomShape } from "./pixi/addRandomShape";
 import { usePixiApp } from "./hooks/usePixiApp";
 
 export function App() {
-  const { pixiApp, isLoadingAssets, switchScene } = usePixiApp();
+  const { pixiApp, isLoadingAssets, switchScene, notifySceneChanged } =
+    usePixiApp();
 
   return (
     <div className="app">
-      <div className="canvases">
+      <div className="canvases" style={{ display: "flex", gap: "16px" }}>
         <PixiCanvas />
         <SkiaCanvas />
       </div>
       <Controls
         onChangeScene={() => switchScene()}
-        onAddRandom={() => addRandomShape(pixiApp!.stage)}
+        onAddRandom={() => {
+          addRandomShape(pixiApp!.stage);
+          notifySceneChanged();
+        }}
         isLoadingScene={isLoadingAssets}
       />
       <div className="status">

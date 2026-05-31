@@ -7,15 +7,19 @@ interface usePixiAppState {
   pixiApp: PIXI.Application | null;
   curSceneIndex: number;
   isLoadingAssets: boolean;
+  sceneVersion: number;
   initApp: (canvasNode: HTMLCanvasElement) => void;
   destroyApp: () => void;
   switchScene: () => void;
+  notifySceneChanged: () => void;
 }
 
 export const usePixiApp = create<usePixiAppState>((set, get) => ({
   pixiApp: null,
   curSceneIndex: 0,
   isLoadingAssets: false,
+  sceneVersion: 0,
+  notifySceneChanged: () => set((s) => ({ sceneVersion: s.sceneVersion + 1 })),
   initApp: (canvasNode: HTMLCanvasElement) => {
     set(() => ({ pixiApp: createPixiApp(canvasNode) }));
   },
@@ -54,6 +58,6 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
 
     pixiApp?.stage.removeChildren();
     pixiApp?.stage.addChild(curScene.build(loadedAssets));
-    // после смены — перерисовать Skia canvas (вызов из 03)
+    get().notifySceneChanged();
   },
 }));
