@@ -1,19 +1,20 @@
 import { useEffect, useRef } from "react";
 import { usePixiApp } from "../hooks/usePixiApp";
-import { CANVAS_SIZE } from "../constans";
+import { CANVAS_SIZE } from "../constants";
 
 export function PixiCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { initApp, destroyApp } = usePixiApp();
+  const { initApp, destroyApp, switchScene } = usePixiApp();
 
   useEffect(() => {
     if (canvasRef.current) {
       initApp(canvasRef.current);
+      switchScene();
     }
     return () => {
       destroyApp();
     };
-  }, [destroyApp, initApp]);
+  }, [destroyApp, initApp, switchScene]);
 
   return (
     <canvas

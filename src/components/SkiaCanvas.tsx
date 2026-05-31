@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { CANVAS_SIZE } from "../constans";
+import { CANVAS_SIZE } from "../constants";
 
 export function SkiaCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);

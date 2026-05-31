@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js-legacy";
-import { CANVAS_SIZE } from "../constans";
+import { CANVAS_SIZE } from "../constants";
+
 export function createPixiApp(view: HTMLCanvasElement): PIXI.Application {
   return new PIXI.Application({
     view,

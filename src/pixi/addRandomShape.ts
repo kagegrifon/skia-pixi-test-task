@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js-legacy";
-import { CANVAS_SIZE } from "../constans";
+import { CANVAS_SIZE } from "../constants";
 
 export function addRandomShape(container: PIXI.Container) {
   const g = new PIXI.Graphics();

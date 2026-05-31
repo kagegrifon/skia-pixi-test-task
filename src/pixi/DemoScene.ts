@@ -120,6 +120,7 @@ const scene3: SceneDef = {
     rect.beginFill(0x3366ff).drawRect(-30, -20, 60, 40).endFill();
     rect.angle = -10;
     rect.scale.set(2, 1);
+    rect.position.set(40, 20);
 
     // Вложенный контейнер с двумя линиями — сетка
     const grid1 = new PIXI.Graphics();
@@ -136,26 +137,5 @@ const scene3: SceneDef = {
   },
 };
 
-const scenes = [scene1, scene2, scene3] as const;
-
-let idx = 0;
-export async function switchScene(
-  stage: PIXI.Container,
-  onLoad: (isLoading: boolean) => void,
-) {
-  const curScene = scenes[idx % scenes.length];
-  idx++;
-
-  const uncached = curScene.assets.filter((url) => !PIXI.Assets.cache.has(url));
-
-  if (uncached.length > 0) onLoad(true); // показываем лоадер только если есть что грузить
-
-  const loadedAssets = await PIXI.Assets.load(curScene.assets);
-
-  if (uncached.length > 0) onLoad(false);
-
-  stage.removeChildren();
-  stage.addChild(curScene.build(loadedAssets));
-  // после смены — перерисовать Skia canvas (вызов из 03)
-}
+export const scenes = [scene1, scene2, scene3] as const;
 
