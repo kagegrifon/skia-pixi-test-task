@@ -38,7 +38,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
   destroyApp() {
     get().selectionManager?.destroy();
     get().pixiApp?.destroy();
-    set(() => ({ pixiApp: null, selectionManager: null }));
+    set(() => ({ pixiApp: null, selectionManager: null, selectionVersion: 0, sceneVersion: 0 }));
   },
   switchScene: async function () {
     const { curSceneIndex, pixiApp } = get();
