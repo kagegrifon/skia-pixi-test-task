@@ -1,24 +1,17 @@
-// src/pixi/EventManager.ts
 import * as PIXI from "pixi.js-legacy";
 import type { SelectionManager } from "./SelectionManager";
 
 const tmpPoint = new PIXI.Point();
 
 export function hitsChild(child: PIXI.DisplayObject, point: PIXI.Point): boolean {
-  // hitArea (в локальных координатах) имеет приоритет — им помечены фигуры
-  // без заливки (линии), для которых contour-тест по graphicsData невозможен.
   if (child.hitArea) {
     child.worldTransform.applyInverse(point, tmpPoint);
     return child.hitArea.contains(tmpPoint.x, tmpPoint.y);
   }
-  // Graphics/Sprite умеют точную проверку по контуру: containsPoint() сам
-  // переводит точку в локальные координаты через worldTransform.applyInverse
-  // и тестирует против реальной геометрии (учитывая заливку и дырки).
   const obj = child as PIXI.DisplayObject & {
     containsPoint?: (p: PIXI.IPointData) => boolean;
   };
   if (obj.containsPoint) return obj.containsPoint(point);
-  // Контейнеры и прочие объекты без геометрии — AABB.
   return child.getBounds().contains(point.x, point.y);
 }
 
@@ -41,7 +34,7 @@ export function hitTest(
 }
 
 export class EventManager {
-  private app: PIXI.Application;
+  private contentLayer: PIXI.Container;
   private canvas: HTMLCanvasElement;
   private selectionManager: SelectionManager | null;
   private onPointerDown: (e: PointerEvent) => void;
@@ -49,11 +42,11 @@ export class EventManager {
   private onPointerMove: (e: PointerEvent) => void;
 
   constructor(
-    app: PIXI.Application,
+    contentLayer: PIXI.Container,
     canvas: HTMLCanvasElement,
     selectionManager?: SelectionManager,
   ) {
-    this.app = app;
+    this.contentLayer = contentLayer;
     this.canvas = canvas;
     this.selectionManager = selectionManager ?? null;
 
@@ -70,7 +63,7 @@ export class EventManager {
     const rect = this.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const hit = hitTest(this.app.stage, new PIXI.Point(x, y));
+    const hit = hitTest(this.contentLayer, new PIXI.Point(x, y));
     const cursor = (hit as PIXI.DisplayObject & { cursor?: string } | null)?.cursor;
     this.canvas.style.cursor = cursor ?? "default";
   }
@@ -80,11 +73,10 @@ export class EventManager {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const hit = hitTest(this.app.stage, new PIXI.Point(x, y));
+    const hit = hitTest(this.contentLayer, new PIXI.Point(x, y));
     if (type === "pointerdown") {
       this.selectionManager?.select(hit);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (hit) (hit as any).emit(type, e);
   }
 
