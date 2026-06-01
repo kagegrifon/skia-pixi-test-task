@@ -7,6 +7,8 @@ import { clearSpriteImageCache } from "../skia/spriteImageCache";
 
 interface usePixiAppState {
   pixiApp: PIXI.Application | null;
+  contentLayer: PIXI.Container | null;
+  overlayLayer: PIXI.Container | null;
   selectionManager: SelectionManager | null;
   selectionVersion: number;
   curSceneIndex: number;
@@ -21,6 +23,8 @@ interface usePixiAppState {
 
 export const usePixiApp = create<usePixiAppState>((set, get) => ({
   pixiApp: null,
+  contentLayer: null,
+  overlayLayer: null,
   selectionManager: null,
   selectionVersion: 0,
   curSceneIndex: 0,
@@ -31,10 +35,13 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     set((s) => ({ selectionVersion: s.selectionVersion + 1 })),
   initApp: (canvasNode: HTMLCanvasElement) => {
     const pixiApp = createPixiApp(canvasNode);
-    const selectionManager = new SelectionManager(pixiApp, () =>
+    const contentLayer = new PIXI.Container();
+    const overlayLayer = new PIXI.Container();
+    pixiApp.stage.addChild(contentLayer, overlayLayer);
+    const selectionManager = new SelectionManager(overlayLayer, () =>
       get().notifySelectionChanged(),
     );
-    set(() => ({ pixiApp, selectionManager }));
+    set(() => ({ pixiApp, contentLayer, overlayLayer, selectionManager }));
   },
   destroyApp() {
     get().selectionManager?.destroy();
@@ -42,6 +49,8 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     get().pixiApp?.destroy();
     set(() => ({
       pixiApp: null,
+      contentLayer: null,
+      overlayLayer: null,
       selectionManager: null,
       selectionVersion: 0,
       sceneVersion: 0,
@@ -49,7 +58,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     }));
   },
   switchScene: async function () {
-    const { curSceneIndex, pixiApp } = get();
+    const { curSceneIndex, pixiApp, contentLayer } = get();
     const nextIndex = (curSceneIndex + 1) % scenes.length;
     const nextScene = scenes[nextIndex];
 
@@ -75,14 +84,14 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
       if (uncached.length > 0) set(() => ({ isLoadingAssets: false }));
     }
 
-    if (!pixiApp) {
+    if (!pixiApp || !contentLayer) {
       console.error("Нет инстанса приложения pixi");
       return;
     }
 
     clearSpriteImageCache();
-    pixiApp.stage.removeChildren();
-    pixiApp.stage.addChild(nextScene.build(loadedAssets));
+    contentLayer.removeChildren();
+    contentLayer.addChild(nextScene.build(loadedAssets));
     set(() => ({ curSceneIndex: nextIndex }));
     get().notifySceneChanged();
   },
