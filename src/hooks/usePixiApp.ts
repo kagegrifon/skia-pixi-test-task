@@ -38,15 +38,20 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
   destroyApp() {
     get().selectionManager?.destroy();
     get().pixiApp?.destroy();
-    set(() => ({ pixiApp: null, selectionManager: null, selectionVersion: 0, sceneVersion: 0 }));
+    set(() => ({
+      pixiApp: null,
+      selectionManager: null,
+      selectionVersion: 0,
+      sceneVersion: 0,
+      curSceneIndex: 0,
+    }));
   },
   switchScene: async function () {
     const { curSceneIndex, pixiApp } = get();
-    const curScene = scenes[curSceneIndex];
+    const nextIndex = (curSceneIndex + 1) % scenes.length;
+    const nextScene = scenes[nextIndex];
 
-    set(() => ({ curSceneIndex: (curSceneIndex + 1) % scenes.length }));
-
-    const uncached = curScene.assets.filter(
+    const uncached = nextScene.assets.filter(
       (url) => !PIXI.Assets.cache.has(url),
     );
 
@@ -54,23 +59,28 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
       set(() => ({ isLoadingAssets: true }));
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let loadedAssets: Record<string, any> = {};
+    let loadedAssets: Record<string, PIXI.Texture>;
     try {
       loadedAssets =
-        curScene.assets.length > 0
-          ? await PIXI.Assets.load(curScene.assets)
+        nextScene.assets.length > 0
+          ? await PIXI.Assets.load(nextScene.assets)
           : {};
-    } catch {
+    } catch (err) {
+      console.error("Не удалось загрузить ассеты сцены", err);
       set(() => ({ isLoadingAssets: false }));
+      return;
+    } finally {
+      if (uncached.length > 0) set(() => ({ isLoadingAssets: false }));
     }
 
-    if (uncached.length > 0) {
-      set(() => ({ isLoadingAssets: false }));
+    if (!pixiApp) {
+      console.error("Нет инстанса приложения pixi");
+      return;
     }
 
-    pixiApp?.stage.removeChildren();
-    pixiApp?.stage.addChild(curScene.build(loadedAssets));
+    pixiApp.stage.removeChildren();
+    pixiApp.stage.addChild(nextScene.build(loadedAssets));
+    set(() => ({ curSceneIndex: nextIndex }));
     get().notifySceneChanged();
   },
 }));
