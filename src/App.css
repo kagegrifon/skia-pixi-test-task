@@ -1,13 +1,164 @@
-.app {
-  padding: 16px;
+:root {
+  --c-dark: #1e2330;
+  --c-pixi: #4f46e5;
+  --c-skia: #0ea5a4;
+  --c-bg: #f5f6f8;
+  --c-border: #e3e6ea;
 }
 
+body {
+  margin: 0;
+  background: var(--c-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #1e2330;
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 0 24px;
+}
+
+/* Шапка */
+.app-header {
+  background: var(--c-dark);
+  color: #fff;
+  padding: 16px 24px;
+}
+
+.app-header__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.app-header__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #aab2c5;
+}
+
+/* Тулбар */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid var(--c-border);
+  padding: 12px 24px;
+}
+
+.btn {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  background: #fff;
+  color: #1e2330;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #f0f1f4;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn--accent {
+  background: var(--c-pixi);
+  border-color: var(--c-pixi);
+  color: #fff;
+}
+
+.btn--accent:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+/* Канвасы */
 .canvases {
   display: flex;
   gap: 16px;
+  padding: 24px;
 }
 
-.status {
-  margin-top: 8px;
+.canvas-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.canvas-card__label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.canvas-card__label--pixi {
+  color: var(--c-pixi);
+}
+
+.canvas-card__label--skia {
+  color: var(--c-skia);
+}
+
+.engine-canvas {
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(30, 35, 48, 0.08);
+  background: #fff;
+  display: block;
+}
+
+/* Оверлей загрузки над канвасом */
+.canvas-stage {
+  position: relative;
+}
+
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(245, 246, 248, 0.7);
   font-size: 14px;
+  color: #1e2330;
+  pointer-events: none;
+}
+
+/* Статус */
+.status {
+  display: flex;
+  gap: 16px;
+  padding: 0 24px;
+}
+
+.status-cell {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.status-cell__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8a93a6;
+}
+
+.status-cell__value {
+  margin-top: 4px;
+  font-size: 15px;
+  min-height: 20px;
 }
