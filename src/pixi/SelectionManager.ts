@@ -11,6 +11,7 @@ export class SelectionManager {
   constructor(overlayLayer: PIXI.Container, onSelectionChange: () => void) {
     this._onSelectionChange = onSelectionChange;
     this._overlay = new PIXI.Graphics();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this._overlay as any).eventMode = 'none';
     overlayLayer.addChild(this._overlay);
   }

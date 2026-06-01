@@ -42,8 +42,9 @@ export class SkiaRenderer {
     }
     const canvas = this.surface.getCanvas();
     canvas.clear(this.ck.Color4f(0.94, 0.94, 0.94, 1));
-    renderContainer(this.ck, canvas, contentLayer, makeBuilderStrategy(this.ck));
-    renderContainer(this.ck, canvas, overlayLayer, makeBuilderStrategy(this.ck));
+    const strategy = makeBuilderStrategy(this.ck);
+    renderContainer(this.ck, canvas, contentLayer, strategy);
+    renderContainer(this.ck, canvas, overlayLayer, strategy);
     this.surface.flush();
   }
 
