@@ -15,19 +15,19 @@ export function renderContainer(
 ): void {
   for (const child of container.children) {
     if (!child.visible) continue;
-    canvas.save();
-    applyWorldTransform(canvas, child);
 
-    if (child instanceof PIXI.Graphics) {
-      renderGraphics(ck, canvas, child, strategy);
-    } else if (child instanceof PIXI.Sprite) {
-      renderSprite(ck, canvas, child);
-    } else if (child instanceof PIXI.Container) {
+    if (child instanceof PIXI.Graphics || child instanceof PIXI.Sprite) {
+      canvas.save();
+      applyWorldTransform(canvas, child);
+      if (child instanceof PIXI.Graphics) {
+        renderGraphics(ck, canvas, child, strategy);
+      } else {
+        renderSprite(ck, canvas, child);
+      }
       canvas.restore();
+    } else if (child instanceof PIXI.Container) {
       renderContainer(ck, canvas, child, strategy);
-      continue;
     }
-    canvas.restore();
   }
 }
 
