@@ -7,6 +7,10 @@ export interface PDFMetadata {
   keywords?: string;
   creator?: string;
   producer?: string;
+  language?: string;
+  rasterDPI?: number;
+  PDFA?: boolean;
+  _rootTag?: null;
 }
 
 export interface PDFDocument {
