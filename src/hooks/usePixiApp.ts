@@ -2,9 +2,12 @@ import * as PIXI from "pixi.js-legacy";
 import { createPixiApp } from "../pixi/createPixiApp";
 import { create } from "zustand";
 import { scenes } from "../pixi/DemoScene";
+import { SelectionManager } from "../pixi/SelectionManager";
 
 interface usePixiAppState {
   pixiApp: PIXI.Application | null;
+  selectionManager: SelectionManager | null;
+  selectionVersion: number;
   curSceneIndex: number;
   isLoadingAssets: boolean;
   sceneVersion: number;
@@ -12,20 +15,30 @@ interface usePixiAppState {
   destroyApp: () => void;
   switchScene: () => void;
   notifySceneChanged: () => void;
+  notifySelectionChanged: () => void;
 }
 
 export const usePixiApp = create<usePixiAppState>((set, get) => ({
   pixiApp: null,
+  selectionManager: null,
+  selectionVersion: 0,
   curSceneIndex: 0,
   isLoadingAssets: false,
   sceneVersion: 0,
   notifySceneChanged: () => set((s) => ({ sceneVersion: s.sceneVersion + 1 })),
+  notifySelectionChanged: () =>
+    set((s) => ({ selectionVersion: s.selectionVersion + 1 })),
   initApp: (canvasNode: HTMLCanvasElement) => {
-    set(() => ({ pixiApp: createPixiApp(canvasNode) }));
+    const pixiApp = createPixiApp(canvasNode);
+    const selectionManager = new SelectionManager(pixiApp, () =>
+      get().notifySelectionChanged(),
+    );
+    set(() => ({ pixiApp, selectionManager }));
   },
   destroyApp() {
+    get().selectionManager?.destroy();
     get().pixiApp?.destroy();
-    set(() => ({ pixiApp: null }));
+    set(() => ({ pixiApp: null, selectionManager: null }));
   },
   switchScene: async function () {
     const { curSceneIndex, pixiApp } = get();
@@ -38,14 +51,14 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     );
 
     if (uncached.length > 0) {
-      set(() => ({ isLoadingAssets: true })); // показываем лоадер только если есть что грузить (иначе возьмем из кеша)
+      set(() => ({ isLoadingAssets: true }));
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let loadedAssets: Record<string, any> = {};
     try {
       loadedAssets =
-        curScene.assets.length > 0 // не вызываем загрузку для тех кому она не нужна
+        curScene.assets.length > 0
           ? await PIXI.Assets.load(curScene.assets)
           : {};
     } catch {
