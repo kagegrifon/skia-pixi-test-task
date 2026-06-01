@@ -5,4 +5,8 @@ export interface InteractionEvent {
   name: string;
 }
 
+export interface SelectionEvent {
+  name: string | null;
+}
+
 export const interactionBus = new PIXI.utils.EventEmitter();
