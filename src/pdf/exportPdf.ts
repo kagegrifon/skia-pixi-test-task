@@ -4,6 +4,7 @@ import * as PIXI from "pixi.js-legacy";
 import { makePaint } from "../skia/skiaColor";
 import { renderSprite } from "../skia/renderSprite";
 import { CANVAS_SIZE } from "../constants";
+import { extractGraphicsData, type ShapeData } from "../skia/graphicsData";
 
 const SHAPES = PIXI.SHAPES;
 
@@ -49,26 +50,6 @@ function downloadBytes(bytes: Uint8Array, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-interface ShapeData {
-  shape: {
-    type: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    radius: number;
-    points: number[];
-    closeStroke: boolean;
-  };
-  fillStyle: { visible: boolean; color: number; alpha: number } | null;
-  lineStyle: {
-    visible: boolean;
-    color: number;
-    alpha: number;
-    width: number;
-  } | null;
-}
-
 // PDF-вариант renderGraphics: использует Path вместо PathBuilder,
 // т.к. canvaskit-pdf не включает PathBuilder.
 function renderGraphicsPdf(
@@ -76,9 +57,7 @@ function renderGraphicsPdf(
   canvas: Canvas,
   gfx: PIXI.Graphics,
 ) {
-  const graphicsData = (
-    gfx.geometry as unknown as { graphicsData: ShapeData[] }
-  ).graphicsData;
+  const graphicsData = extractGraphicsData(gfx);
 
   for (const data of graphicsData) {
     const { shape, fillStyle, lineStyle } = data;
