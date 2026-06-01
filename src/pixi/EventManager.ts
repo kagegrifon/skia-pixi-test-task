@@ -44,6 +44,7 @@ export class EventManager {
   private selectionManager: SelectionManager | null;
   private onPointerDown: (e: PointerEvent) => void;
   private onPointerUp: (e: PointerEvent) => void;
+  private onPointerMove: (e: PointerEvent) => void;
 
   constructor(
     app: PIXI.Application,
@@ -56,9 +57,20 @@ export class EventManager {
 
     this.onPointerDown = (e) => this.handleEvent("pointerdown", e);
     this.onPointerUp = (e) => this.handleEvent("pointerup", e);
+    this.onPointerMove = (e) => this.updateCursor(e);
 
     canvas.addEventListener("pointerdown", this.onPointerDown);
     canvas.addEventListener("pointerup", this.onPointerUp);
+    canvas.addEventListener("pointermove", this.onPointerMove);
+  }
+
+  private updateCursor(e: PointerEvent): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const hit = hitTest(this.app.stage, new PIXI.Point(x, y));
+    const cursor = (hit as PIXI.DisplayObject & { cursor?: string } | null)?.cursor;
+    this.canvas.style.cursor = cursor ?? "default";
   }
 
   private handleEvent(type: string, e: PointerEvent): void {
@@ -77,5 +89,6 @@ export class EventManager {
   destroy(): void {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
     this.canvas.removeEventListener("pointerup", this.onPointerUp);
+    this.canvas.removeEventListener("pointermove", this.onPointerMove);
   }
 }
