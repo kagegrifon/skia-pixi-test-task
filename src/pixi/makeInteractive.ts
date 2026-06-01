@@ -3,6 +3,7 @@ import { interactionBus } from "./interactionBus";
 import { StrokeHitArea } from "./StrokeHitArea";
 
 export function makeInteractive(obj: PIXI.DisplayObject, name: string): void {
+  obj.name = name;
   obj.eventMode = "static";
   obj.cursor = "pointer";
   if (obj instanceof PIXI.Graphics) {
