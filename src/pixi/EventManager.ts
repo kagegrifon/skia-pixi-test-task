@@ -1,5 +1,6 @@
 // src/pixi/EventManager.ts
 import * as PIXI from "pixi.js-legacy";
+import type { SelectionManager } from "./SelectionManager";
 
 const tmpPoint = new PIXI.Point();
 
@@ -40,12 +41,18 @@ function hitTest(
 export class EventManager {
   private app: PIXI.Application;
   private canvas: HTMLCanvasElement;
+  private selectionManager: SelectionManager | null;
   private onPointerDown: (e: PointerEvent) => void;
   private onPointerUp: (e: PointerEvent) => void;
 
-  constructor(app: PIXI.Application, canvas: HTMLCanvasElement) {
+  constructor(
+    app: PIXI.Application,
+    canvas: HTMLCanvasElement,
+    selectionManager?: SelectionManager,
+  ) {
     this.app = app;
     this.canvas = canvas;
+    this.selectionManager = selectionManager ?? null;
 
     this.onPointerDown = (e) => this.handleEvent("pointerdown", e);
     this.onPointerUp = (e) => this.handleEvent("pointerup", e);
@@ -60,6 +67,9 @@ export class EventManager {
     const y = e.clientY - rect.top;
 
     const hit = hitTest(this.app.stage, new PIXI.Point(x, y));
+    if (type === "pointerdown") {
+      this.selectionManager?.select(hit);
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (hit) (hit as any).emit(type, e);
   }
