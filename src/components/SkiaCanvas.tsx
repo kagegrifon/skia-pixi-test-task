@@ -14,6 +14,7 @@ export function SkiaCanvas() {
   const [skiaReady, setSkiaReady] = useState(false);
   const pixiApp = usePixiApp((s) => s.pixiApp);
   const sceneVersion = usePixiApp((s) => s.sceneVersion);
+  const selectionVersion = usePixiApp((s) => s.selectionVersion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEventManager(pixiApp, canvasRef);
@@ -34,7 +35,7 @@ export function SkiaCanvas() {
     if (!skiaReady || !pixiApp) return;
     pixiApp.renderer.render(pixiApp.stage);
     convertPixiContainerToSkia(pixiApp.stage);
-  }, [skiaReady, pixiApp, sceneVersion]);
+  }, [skiaReady, pixiApp, sceneVersion, selectionVersion]);
 
   return (
     <>
