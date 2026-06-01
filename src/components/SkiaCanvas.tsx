@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CANVAS_SIZE } from "../constants";
 import {
   initSkia,
@@ -6,6 +6,7 @@ import {
   convertPixiContainerToSkia,
 } from "../skia/SkiaRenderer";
 import { usePixiApp } from "../hooks/usePixiApp";
+import { useEventManager } from "../hooks/useEventManager";
 
 const SKIA_CANVAS_ID = "skia-canvas";
 
@@ -13,6 +14,9 @@ export function SkiaCanvas() {
   const [skiaReady, setSkiaReady] = useState(false);
   const pixiApp = usePixiApp((s) => s.pixiApp);
   const sceneVersion = usePixiApp((s) => s.sceneVersion);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEventManager(pixiApp, canvasRef.current);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,8 +32,6 @@ export function SkiaCanvas() {
 
   useEffect(() => {
     if (!skiaReady || !pixiApp) return;
-    // Форсируем рендер Pixi, чтобы финализировать currentPath во всех Graphics
-    // (moveTo/lineTo не попадают в graphicsData до рендера Pixi)
     pixiApp.renderer.render(pixiApp.stage);
     convertPixiContainerToSkia(pixiApp.stage);
   }, [skiaReady, pixiApp, sceneVersion]);
@@ -39,6 +41,7 @@ export function SkiaCanvas() {
       {!skiaReady && <div style={{ position: "absolute" }}>Загрузка Skia…</div>}
       <canvas
         id={SKIA_CANVAS_ID}
+        ref={canvasRef}
         width={CANVAS_SIZE.width}
         height={CANVAS_SIZE.height}
         style={{ border: "1px solid gray" }}
