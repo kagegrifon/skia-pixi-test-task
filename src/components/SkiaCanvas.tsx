@@ -16,7 +16,7 @@ export function SkiaCanvas() {
   const sceneVersion = usePixiApp((s) => s.sceneVersion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEventManager(pixiApp, canvasRef.current);
+  useEventManager(pixiApp, canvasRef);
 
   useEffect(() => {
     let cancelled = false;
