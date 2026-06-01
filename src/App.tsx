@@ -5,11 +5,13 @@ import { SkiaCanvas } from "./components/SkiaCanvas";
 import { addRandomShape } from "./pixi/addRandomShape";
 import { usePixiApp } from "./hooks/usePixiApp";
 import { exportScenePdf } from "./pdf/exportPdf";
+import { useEventStatus } from "./hooks/useEventStatus";
 
 export function App() {
   const { pixiApp, isLoadingAssets, switchScene, notifySceneChanged } =
     usePixiApp();
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const status = useEventStatus((s) => s.status);
 
   async function handleExportPdf() {
     if (!pixiApp) return;
@@ -40,6 +42,7 @@ export function App() {
       <div className="status">
         {isLoadingAssets && <div>Загружаем картинку для pixi...</div>}
         {isExportingPdf && <div>Генерация PDF…</div>}
+        {status && <div>{status}</div>}
       </div>
     </div>
   );
