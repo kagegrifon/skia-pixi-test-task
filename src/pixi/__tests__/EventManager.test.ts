@@ -81,4 +81,37 @@ describe('hitTest', () => {
     root.addChild(inner);
     expect(hitTest(root, new PIXI.Point(0, 0))).toBe(leaf);
   });
+
+  it('пропускает объект с visible=false', () => {
+    const container = new PIXI.Container();
+    const obj = makeObjWithHitArea(() => true);
+    obj.visible = false;
+    container.addChild(obj);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
+  });
+
+  it('выбирает видимый объект, игнорируя invisible под ним', () => {
+    const container = new PIXI.Container();
+    const hidden = makeObjWithHitArea(() => true);
+    hidden.visible = false;
+    const visible = makeObjWithHitArea(() => true);
+    container.addChild(hidden);
+    container.addChild(visible);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBe(visible);
+  });
+
+  it('пропускает объект с eventMode="none"', () => {
+    const container = new PIXI.Container();
+    const obj = makeObjWithHitArea(() => true);
+    (obj as any).eventMode = 'none';
+    container.addChild(obj);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
+  });
+
+  it('объект без eventMode "none" по-прежнему попадает', () => {
+    const container = new PIXI.Container();
+    const obj = makeObjWithHitArea(() => true);
+    container.addChild(obj);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBe(obj);
+  });
 });

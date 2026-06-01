@@ -13,6 +13,7 @@ export class SelectionManager {
     this._app = app;
     this._onSelectionChange = onSelectionChange;
     this._overlay = new PIXI.Graphics();
+    (this._overlay as PIXI.Graphics & { eventMode?: string }).eventMode = 'none';
     app.stage.addChild(this._overlay);
   }
 
