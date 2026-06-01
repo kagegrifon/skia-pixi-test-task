@@ -37,6 +37,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     const pixiApp = createPixiApp(canvasNode);
     const contentLayer = new PIXI.Container();
     const overlayLayer = new PIXI.Container();
+    (overlayLayer as any).eventMode = 'none';
     pixiApp.stage.addChild(contentLayer, overlayLayer);
     const selectionManager = new SelectionManager(overlayLayer, () =>
       get().notifySelectionChanged(),
@@ -90,6 +91,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     }
 
     clearSpriteImageCache();
+    get().selectionManager?.select(null);
     contentLayer.removeChildren();
     contentLayer.addChild(nextScene.build(loadedAssets));
     set(() => ({ curSceneIndex: nextIndex }));
