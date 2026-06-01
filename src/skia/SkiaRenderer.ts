@@ -6,6 +6,7 @@ import CanvasKitInit, {
 import * as PIXI from "pixi.js-legacy";
 import { makePaint } from "./skiaColor";
 import { renderSprite } from "./renderSprite";
+import { extractGraphicsData, type ShapeData } from "./graphicsData";
 
 const SHAPES = PIXI.SHAPES;
 let CK: CanvasKit | null = null;
@@ -64,30 +65,8 @@ function applyWorldTransform(canvas: Canvas, obj: PIXI.DisplayObject) {
   canvas.concat([t.a, t.c, t.tx, t.b, t.d, t.ty, 0, 0, 1]);
 }
 
-interface ShapeData {
-  shape: {
-    type: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    radius: number;
-    points: number[];
-    closeStroke: boolean;
-  };
-  fillStyle: { visible: boolean; color: number; alpha: number } | null;
-  lineStyle: {
-    visible: boolean;
-    color: number;
-    alpha: number;
-    width: number;
-  } | null;
-}
-
 function renderGraphics(ck: CanvasKit, canvas: Canvas, gfx: PIXI.Graphics) {
-  const graphicsData = (
-    gfx.geometry as unknown as { graphicsData: ShapeData[] }
-  ).graphicsData;
+  const graphicsData = extractGraphicsData(gfx);
 
   for (const data of graphicsData) {
     const { shape, fillStyle, lineStyle } = data;
