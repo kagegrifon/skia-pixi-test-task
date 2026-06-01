@@ -51,15 +51,15 @@ export function SkiaCanvas() {
   }
 
   return (
-    <>
-      {!skiaReady && <div style={{ position: "absolute" }}>Загрузка Skia…</div>}
+    <div className="canvas-stage">
       <canvas
         id={SKIA_CANVAS_ID}
         ref={canvasRef}
         width={CANVAS_SIZE.width}
         height={CANVAS_SIZE.height}
-        style={{ border: "1px solid gray" }}
+        className="engine-canvas"
       />
-    </>
+      {!skiaReady && <div className="canvas-overlay">Загрузка Skia…</div>}
+    </div>
   );
 }

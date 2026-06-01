@@ -6,6 +6,7 @@ import { CANVAS_SIZE } from "../constants";
 export function PixiCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { initApp, destroyApp, switchScene } = usePixiApp();
+  const isLoadingAssets = usePixiApp((s) => s.isLoadingAssets);
   useEventManager(canvasRef);
 
   useEffect(() => {
@@ -19,11 +20,14 @@ export function PixiCanvas() {
   }, [destroyApp, initApp, switchScene]);
 
   return (
-    <canvas
-      width={CANVAS_SIZE.width}
-      height={CANVAS_SIZE.height}
-      ref={canvasRef}
-      style={{ border: "1px solid gray" }}
-    />
+    <div className="canvas-stage">
+      <canvas
+        width={CANVAS_SIZE.width}
+        height={CANVAS_SIZE.height}
+        ref={canvasRef}
+        className="engine-canvas"
+      />
+      {isLoadingAssets && <div className="canvas-overlay">Загрузка сцены…</div>}
+    </div>
   );
 }
