@@ -3,6 +3,7 @@ import { createPixiApp } from "../pixi/createPixiApp";
 import { create } from "zustand";
 import { scenes } from "../pixi/DemoScene";
 import { SelectionManager } from "../pixi/SelectionManager";
+import { clearSpriteImageCache } from "../skia/spriteImageCache";
 
 interface usePixiAppState {
   pixiApp: PIXI.Application | null;
@@ -38,6 +39,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
   destroyApp() {
     get().selectionManager?.destroy();
     get().pixiApp?.destroy();
+    clearSpriteImageCache();
     set(() => ({
       pixiApp: null,
       selectionManager: null,

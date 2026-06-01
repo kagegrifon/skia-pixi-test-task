@@ -1,29 +1,13 @@
 import type { Canvas, CanvasKit } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
+import { getSpriteImage } from "./spriteImageCache";
 
 export function renderSprite(
   CK: CanvasKit,
   canvas: Canvas,
   sprite: PIXI.Sprite,
-) {
-  const resource = sprite.texture?.baseTexture?.resource;
-  if (!(resource instanceof PIXI.BaseImageResource)) return;
-  const src = resource.source;
-
-  let img: ReturnType<typeof CK.MakeImageFromCanvasImageSource> | null = null;
-
-  if (src instanceof HTMLImageElement) {
-    // HTMLImageElement нельзя передавать напрямую — рисуем через offscreen canvas
-    const offscreen = document.createElement("canvas");
-    offscreen.width = src.naturalWidth;
-    offscreen.height = src.naturalHeight;
-    offscreen.getContext("2d")!.drawImage(src, 0, 0);
-    img = CK.MakeImageFromCanvasImageSource(offscreen);
-  } else if (src instanceof ImageBitmap) {
-    // ImageBitmap — валидный CanvasImageSource, принимается напрямую
-    img = CK.MakeImageFromCanvasImageSource(src);
-  }
-
+): void {
+  const img = getSpriteImage(CK, sprite);
   if (!img) return;
 
   // worldTransform уже включает sprite.scale, поэтому рисуем по натуральным
@@ -41,5 +25,5 @@ export function renderSprite(
     paint,
   );
   paint.delete();
-  img.delete();
+  // img.delete() намеренно отсутствует — SkImage живёт в кэше
 }
