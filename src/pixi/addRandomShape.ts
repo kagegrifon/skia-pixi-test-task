@@ -1,5 +1,8 @@
 import * as PIXI from "pixi.js-legacy";
 import { CANVAS_SIZE } from "../constants";
+import { makeInteractive } from "./makeInteractive";
+
+const counts = { circle: 0, rectangle: 0, line: 0 };
 
 export function addRandomShape(container: PIXI.Container) {
   const g = new PIXI.Graphics();
@@ -30,12 +33,13 @@ export function addRandomShape(container: PIXI.Container) {
 
   const shapeDrawFuncKeys = Object.keys(shapeDrawFunc);
   const shapeIndex = Math.floor(Math.random() * shapeDrawFuncKeys.length);
-
   const curRandomShape = shapeDrawFuncKeys[
     shapeIndex
   ] as keyof typeof shapeDrawFunc;
+
   shapeDrawFunc[curRandomShape]();
+  counts[curRandomShape] += 1;
+  makeInteractive(g, `random-${curRandomShape}-${counts[curRandomShape]}`);
 
   container.addChild(g);
-  // после добавления — перерисовать Skia canvas
 }
