@@ -77,6 +77,7 @@ export class EventManager {
     if (type === "pointerdown") {
       this.selectionManager?.select(hit);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (hit) (hit as any).emit(type, e);
   }
 
