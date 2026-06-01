@@ -1,4 +1,4 @@
-import type { CanvasKit } from "canvaskit-wasm";
+import type { CanvasKit, Path } from "canvaskit-wasm";
 import type { CanvasKitPDF } from "../pdf/canvaskit-pdf";
 
 export interface SkiaPath {
@@ -11,7 +11,7 @@ export interface SkiaPath {
 }
 
 export interface SkiaPathSnapshot {
-  path: unknown;
+  path: Path;
   dispose(): void;
 }
 
