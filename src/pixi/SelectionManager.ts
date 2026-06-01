@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js-legacy";
+import { interactionBus } from "./interactionBus";
 
 const SELECTION_COLOR = 0xffffff;
 const SELECTION_ALPHA = 0.6;
@@ -38,6 +39,7 @@ export class SelectionManager {
       this._overlay.lineStyle(SELECTION_LINE_WIDTH, SELECTION_COLOR, SELECTION_ALPHA);
       this._overlay.drawPolygon(pts.flatMap((p) => [p.x, p.y]));
     }
+    interactionBus.emit("selection", { name: obj?.name || null });
     this._onSelectionChange();
   }
 
