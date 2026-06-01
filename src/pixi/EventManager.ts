@@ -30,7 +30,7 @@ export function hitTest(
   for (let i = children.length - 1; i >= 0; i--) {
     const child = children[i];
     if (!child.visible) continue;
-    if ((child as PIXI.DisplayObject & { eventMode?: string }).eventMode === 'none') continue;
+    if ((child as any).eventMode === 'none') continue;
     if (child instanceof PIXI.Container) {
       const hit = hitTest(child, point);
       if (hit) return hit;
