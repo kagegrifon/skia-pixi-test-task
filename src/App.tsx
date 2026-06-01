@@ -7,6 +7,7 @@ import { usePixiApp } from "./hooks/usePixiApp";
 import { exportScenePdf } from "./pdf/exportPdf";
 import { useEventStatus } from "./hooks/useEventStatus";
 import { interactionBus, type InteractionEvent } from "./pixi/interactionBus";
+import "./App.css";
 
 export function App() {
   const { pixiApp, contentLayer, isLoadingAssets, switchScene, notifySceneChanged } =
@@ -33,7 +34,7 @@ export function App() {
 
   return (
     <div className="app">
-      <div className="canvases" style={{ display: "flex", gap: "16px" }}>
+      <div className="canvases">
         <PixiCanvas />
         <SkiaCanvas />
       </div>

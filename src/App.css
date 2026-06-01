@@ -1,0 +1,13 @@
+.app {
+  padding: 16px;
+}
+
+.canvases {
+  display: flex;
+  gap: 16px;
+}
+
+.status {
+  margin-top: 8px;
+  font-size: 14px;
+}
