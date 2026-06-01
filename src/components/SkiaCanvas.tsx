@@ -37,7 +37,7 @@ export function SkiaCanvas() {
   }, [skiaReady, pixiApp, sceneVersion]);
 
   return (
-    <div>
+    <>
       {!skiaReady && <div style={{ position: "absolute" }}>Загрузка Skia…</div>}
       <canvas
         id={SKIA_CANVAS_ID}
@@ -46,6 +46,7 @@ export function SkiaCanvas() {
         height={CANVAS_SIZE.height}
         style={{ border: "1px solid gray" }}
       />
-    </div>
+    </>
   );
 }
+
