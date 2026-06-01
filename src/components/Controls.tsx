@@ -13,11 +13,13 @@ export function Controls({
 }) {
   return (
     <>
-      <button onClick={onAddRandom}>Добавить фигуру</button>
-      <button onClick={onChangeScene} disabled={isLoadingScene}>
+      <button className="btn btn--accent" onClick={onAddRandom}>
+        Добавить фигуру
+      </button>
+      <button className="btn" onClick={onChangeScene} disabled={isLoadingScene}>
         Переключить сцену
       </button>
-      <button onClick={onExportPdf} disabled={isExportingPdf}>
+      <button className="btn" onClick={onExportPdf} disabled={isExportingPdf}>
         {isExportingPdf ? "Генерация PDF…" : "Экспорт PDF"}
       </button>
     </>
