@@ -6,20 +6,31 @@ import { addRandomShape } from "./pixi/addRandomShape";
 import { usePixiApp } from "./hooks/usePixiApp";
 import { exportScenePdf } from "./pdf/exportPdf";
 import { useEventStatus } from "./hooks/useEventStatus";
-import { interactionBus, type InteractionEvent } from "./pixi/interactionBus";
+import {
+  interactionBus,
+  type InteractionEvent,
+  type SelectionEvent,
+} from "./pixi/interactionBus";
 import "./App.css";
 
 export function App() {
   const { pixiApp, contentLayer, isLoadingAssets, switchScene, notifySceneChanged } =
     usePixiApp();
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const status = useEventStatus((s) => s.status);
+  const lastEvent = useEventStatus((s) => s.lastEvent);
+  const selected = useEventStatus((s) => s.selected);
 
   useEffect(() => {
-    const h = (e: InteractionEvent) =>
-      useEventStatus.getState().setStatus(`${e.name} ${e.type}`);
-    interactionBus.on("interaction", h);
-    return () => { interactionBus.off("interaction", h); };
+    const onInteraction = (e: InteractionEvent) =>
+      useEventStatus.getState().setLastEvent(`${e.name} · ${e.type}`);
+    const onSelection = (e: SelectionEvent) =>
+      useEventStatus.getState().setSelected(e.name);
+    interactionBus.on("interaction", onInteraction);
+    interactionBus.on("selection", onSelection);
+    return () => {
+      interactionBus.off("interaction", onInteraction);
+      interactionBus.off("selection", onSelection);
+    };
   }, []);
 
   async function handleExportPdf() {
@@ -34,26 +45,46 @@ export function App() {
 
   return (
     <div className="app">
-      <div className="canvases">
-        <PixiCanvas />
-        <SkiaCanvas />
+      <header className="app-header">
+        <h1 className="app-header__title">Pixi vs Skia</h1>
+        <p className="app-header__subtitle">сравнение рендеринга одной сцены</p>
+      </header>
+
+      <div className="toolbar">
+        <Controls
+          onChangeScene={() => switchScene()}
+          onAddRandom={() => {
+            if (contentLayer) {
+              addRandomShape(contentLayer);
+              notifySceneChanged();
+            }
+          }}
+          onExportPdf={handleExportPdf}
+          isLoadingScene={isLoadingAssets}
+          isExportingPdf={isExportingPdf}
+        />
       </div>
-      <Controls
-        onChangeScene={() => switchScene()}
-        onAddRandom={() => {
-          if (contentLayer) {
-            addRandomShape(contentLayer);
-            notifySceneChanged();
-          }
-        }}
-        onExportPdf={handleExportPdf}
-        isLoadingScene={isLoadingAssets}
-        isExportingPdf={isExportingPdf}
-      />
+
+      <div className="canvases">
+        <div className="canvas-card">
+          <span className="canvas-card__label canvas-card__label--pixi">Pixi.js</span>
+          <PixiCanvas />
+        </div>
+        <div className="canvas-card">
+          <span className="canvas-card__label canvas-card__label--skia">Skia</span>
+          <SkiaCanvas />
+        </div>
+      </div>
+
       <div className="status">
-        {isLoadingAssets && <div>Загружаем картинку для pixi...</div>}
-        {isExportingPdf && <div>Генерация PDF…</div>}
-        {status && <div>{status}</div>}
+        <div className="status-cell">
+          <div className="status-cell__label">Последнее событие</div>
+          <div className="status-cell__value">{lastEvent}</div>
+        </div>
+        <div className="status-cell">
+          <div className="status-cell__label">Выделено</div>
+          <div className="status-cell__value">{selected ?? ""}</div>
+        </div>
       </div>
     </div>
   );
