@@ -6,9 +6,7 @@ import { CANVAS_SIZE } from "../constants";
 export function PixiCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { initApp, destroyApp, switchScene } = usePixiApp();
-  const pixiApp = usePixiApp((s) => s.pixiApp);
-
-  useEventManager(pixiApp, canvasRef);
+  useEventManager(canvasRef);
 
   useEffect(() => {
     if (canvasRef.current) {
