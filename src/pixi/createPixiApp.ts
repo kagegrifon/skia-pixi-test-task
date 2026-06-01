@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js-legacy";
-import { CANVAS_SIZE } from "../constants";
+import { CANVAS_SIZE, BACKGROUND } from "../constants";
+import { backgroundToHex } from "../utils/color";
 
 export function createPixiApp(view: HTMLCanvasElement): PIXI.Application {
   return new PIXI.Application({
@@ -7,7 +8,6 @@ export function createPixiApp(view: HTMLCanvasElement): PIXI.Application {
     width: CANVAS_SIZE.width,
     height: CANVAS_SIZE.height,
     forceCanvas: true, // ОБЯЗАТЕЛЬНО по заданию (canvas-рендер, не WebGL)
-    backgroundColor: 0xf0f0f0,
-    antialias: true,
+    backgroundColor: backgroundToHex(BACKGROUND),
   });
 }

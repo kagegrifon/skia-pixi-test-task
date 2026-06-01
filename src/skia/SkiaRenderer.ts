@@ -5,6 +5,7 @@ import CanvasKitInit, {
 import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "./renderScene";
 import { makeBuilderStrategy } from "./pathStrategy";
+import { BACKGROUND } from "../constants";
 
 let ckPromise: Promise<CanvasKit> | null = null;
 
@@ -41,7 +42,7 @@ export class SkiaRenderer {
       if (child.visible) child.updateTransform();
     }
     const canvas = this.surface.getCanvas();
-    canvas.clear(this.ck.Color4f(0.94, 0.94, 0.94, 1));
+    canvas.clear(this.ck.Color4f(BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, 1));
     const strategy = makeBuilderStrategy(this.ck);
     renderContainer(this.ck, canvas, contentLayer, strategy);
     renderContainer(this.ck, canvas, overlayLayer, strategy);
