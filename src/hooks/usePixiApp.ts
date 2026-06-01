@@ -38,8 +38,8 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
   },
   destroyApp() {
     get().selectionManager?.destroy();
-    get().pixiApp?.destroy();
     clearSpriteImageCache();
+    get().pixiApp?.destroy();
     set(() => ({
       pixiApp: null,
       selectionManager: null,
@@ -80,6 +80,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
       return;
     }
 
+    clearSpriteImageCache();
     pixiApp.stage.removeChildren();
     pixiApp.stage.addChild(nextScene.build(loadedAssets));
     set(() => ({ curSceneIndex: nextIndex }));

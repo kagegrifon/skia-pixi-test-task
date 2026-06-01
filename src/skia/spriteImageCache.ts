@@ -5,7 +5,7 @@ const cache = new Map<number, SkImage>();
 
 export function buildSkImage(
   CK: CanvasKit,
-  src: HTMLImageElement | ImageBitmap,
+  src: unknown,
 ): SkImage | null {
   if (src instanceof HTMLImageElement) {
     const offscreen = document.createElement('canvas');
@@ -29,7 +29,7 @@ export function getSpriteImage(CK: CanvasKit, sprite: PIXI.Sprite): SkImage | nu
   const cached = cache.get(key);
   if (cached) return cached;
 
-  const img = buildSkImage(CK, resource.source as HTMLImageElement | ImageBitmap);
+  const img = buildSkImage(CK, resource.source);
   if (img) cache.set(key, img);
   return img;
 }
