@@ -6,30 +6,48 @@ import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "./renderScene";
 import { makeBuilderStrategy } from "./pathStrategy";
 
-let CK: CanvasKit | null = null;
-let surface: Surface | null = null;
+let ckPromise: Promise<CanvasKit> | null = null;
 
-export async function initSkia(): Promise<CanvasKit> {
-  if (CK) return CK;
-  CK = await CanvasKitInit({
+function loadCanvasKit(): Promise<CanvasKit> {
+  return (ckPromise ??= CanvasKitInit({
     locateFile: (file) => `/canvaskit/${file}`,
-  });
-  return CK;
+  }));
 }
 
-export function setupSkiaSurface(canvasId: string): void {
-  if (!CK) return;
-  surface =
-    CK.MakeWebGLCanvasSurface(canvasId) ?? CK.MakeSWCanvasSurface(canvasId);
-}
+export class SkiaRenderer {
+  private ck: CanvasKit;
+  private surface: Surface;
 
-export function convertPixiContainerToSkia(container: PIXI.Container): void {
-  if (!CK || !surface) return;
-  for (const child of container.children) {
-    if (child.visible) child.updateTransform();
+  private constructor(ck: CanvasKit, surface: Surface) {
+    this.ck = ck;
+    this.surface = surface;
   }
-  const canvas = surface.getCanvas();
-  canvas.clear(CK.Color4f(0.94, 0.94, 0.94, 1));
-  renderContainer(CK, canvas, container, makeBuilderStrategy(CK));
-  surface.flush();
+
+  static async create(canvasId: string): Promise<SkiaRenderer> {
+    const ck = await loadCanvasKit();
+    const surface =
+      ck.MakeWebGLCanvasSurface(canvasId) ?? ck.MakeSWCanvasSurface(canvasId);
+    if (!surface) {
+      throw new Error(`Skia: не удалось создать surface для #${canvasId}`);
+    }
+    return new SkiaRenderer(ck, surface);
+  }
+
+  render(contentLayer: PIXI.Container, overlayLayer: PIXI.Container): void {
+    for (const child of contentLayer.children) {
+      if (child.visible) child.updateTransform();
+    }
+    for (const child of overlayLayer.children) {
+      if (child.visible) child.updateTransform();
+    }
+    const canvas = this.surface.getCanvas();
+    canvas.clear(this.ck.Color4f(0.94, 0.94, 0.94, 1));
+    renderContainer(this.ck, canvas, contentLayer, makeBuilderStrategy(this.ck));
+    renderContainer(this.ck, canvas, overlayLayer, makeBuilderStrategy(this.ck));
+    this.surface.flush();
+  }
+
+  destroy(): void {
+    this.surface.delete();
+  }
 }

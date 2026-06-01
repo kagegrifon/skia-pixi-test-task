@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CANVAS_SIZE } from "../constants";
-import {
-  initSkia,
-  setupSkiaSurface,
-  convertPixiContainerToSkia,
-} from "../skia/SkiaRenderer";
+import { SkiaRenderer } from "../skia/SkiaRenderer";
 import { usePixiApp } from "../hooks/usePixiApp";
 import { useEventManager } from "../hooks/useEventManager";
 
@@ -12,30 +8,47 @@ const SKIA_CANVAS_ID = "skia-canvas";
 
 export function SkiaCanvas() {
   const [skiaReady, setSkiaReady] = useState(false);
+  const [skiaError, setSkiaError] = useState<string | null>(null);
   const pixiApp = usePixiApp((s) => s.pixiApp);
+  const contentLayer = usePixiApp((s) => s.contentLayer);
+  const overlayLayer = usePixiApp((s) => s.overlayLayer);
   const sceneVersion = usePixiApp((s) => s.sceneVersion);
   const selectionVersion = usePixiApp((s) => s.selectionVersion);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rendererRef = useRef<SkiaRenderer | null>(null);
 
   useEventManager(canvasRef);
 
   useEffect(() => {
-    let cancelled = false;
-    initSkia().then(() => {
-      if (cancelled) return;
-      setupSkiaSurface(SKIA_CANVAS_ID);
-      setSkiaReady(true);
-    });
+    let r: SkiaRenderer | null = null;
+    SkiaRenderer.create(SKIA_CANVAS_ID)
+      .then((inst) => {
+        r = inst;
+        rendererRef.current = inst;
+        setSkiaReady(true);
+      })
+      .catch((err: unknown) => {
+        setSkiaError(String(err));
+      });
     return () => {
-      cancelled = true;
+      r?.destroy();
+      rendererRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (!skiaReady || !pixiApp) return;
+    if (!skiaReady || !pixiApp || !contentLayer || !overlayLayer) return;
     pixiApp.renderer.render(pixiApp.stage);
-    convertPixiContainerToSkia(pixiApp.stage);
-  }, [skiaReady, pixiApp, sceneVersion, selectionVersion]);
+    rendererRef.current?.render(contentLayer, overlayLayer);
+  }, [skiaReady, pixiApp, contentLayer, overlayLayer, sceneVersion, selectionVersion]);
+
+  if (skiaError) {
+    return (
+      <div style={{ width: CANVAS_SIZE.width, height: CANVAS_SIZE.height, border: "1px solid red", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        Ошибка Skia: {skiaError}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -50,4 +63,3 @@ export function SkiaCanvas() {
     </>
   );
 }
-
