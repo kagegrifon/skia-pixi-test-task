@@ -4,7 +4,7 @@ import type { SelectionManager } from "./SelectionManager";
 
 const tmpPoint = new PIXI.Point();
 
-function hitsChild(child: PIXI.DisplayObject, point: PIXI.Point): boolean {
+export function hitsChild(child: PIXI.DisplayObject, point: PIXI.Point): boolean {
   // hitArea (в локальных координатах) имеет приоритет — им помечены фигуры
   // без заливки (линии), для которых contour-тест по graphicsData невозможен.
   if (child.hitArea) {
@@ -22,7 +22,7 @@ function hitsChild(child: PIXI.DisplayObject, point: PIXI.Point): boolean {
   return child.getBounds().contains(point.x, point.y);
 }
 
-function hitTest(
+export function hitTest(
   container: PIXI.Container,
   point: PIXI.Point,
 ): PIXI.DisplayObject | null {

@@ -7,5 +7,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     coverage: { provider: 'v8' },
+    setupFiles: ['./src/pixi/__tests__/setup.ts'],
   },
 })
