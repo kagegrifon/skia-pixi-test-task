@@ -22,7 +22,7 @@ const HIT_PADDING = 3;
 export class StrokeHitArea implements PIXI.IHitArea {
   private strokes: Stroke[];
 
-  private constructor(strokes: Stroke[]) {
+  constructor(strokes: Stroke[]) {
     this.strokes = strokes;
   }
 
@@ -79,7 +79,7 @@ export class StrokeHitArea implements PIXI.IHitArea {
 }
 
 /** Квадрат расстояния от точки (px,py) до отрезка (ax,ay)-(bx,by). */
-function distSqToSegment(
+export function distSqToSegment(
   px: number,
   py: number,
   ax: number,
