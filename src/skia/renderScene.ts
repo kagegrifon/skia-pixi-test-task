@@ -1,7 +1,7 @@
 import type { Canvas, CanvasKit } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 import { makePaint } from "./skiaColor";
-import { renderSprite } from "./renderSprite";
+import { renderSprite, type SpriteImageResolver } from "./renderSprite";
 import { extractGraphicsData } from "./graphicsData";
 import type { PathStrategy } from "./pathStrategy";
 
@@ -12,6 +12,7 @@ export function renderContainer(
   canvas: Canvas,
   container: PIXI.Container,
   strategy: PathStrategy,
+  resolveImage?: SpriteImageResolver,
 ): void {
   for (const child of container.children) {
     if (!child.visible) continue;
@@ -22,11 +23,11 @@ export function renderContainer(
       if (child instanceof PIXI.Graphics) {
         renderGraphics(ck, canvas, child, strategy);
       } else {
-        renderSprite(ck, canvas, child);
+        renderSprite(ck, canvas, child, resolveImage);
       }
       canvas.restore();
     } else if (child instanceof PIXI.Container) {
-      renderContainer(ck, canvas, child, strategy);
+      renderContainer(ck, canvas, child, strategy, resolveImage);
     }
   }
 }

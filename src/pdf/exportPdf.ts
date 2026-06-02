@@ -2,7 +2,8 @@ import type { CanvasKitPDF } from "./canvaskit-pdf";
 import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "../skia/renderScene";
 import { CANVAS_SIZE } from "../constants";
-import { makeBuilderStrategy } from "../skia/pathStrategy";
+import { makePathStrategy } from "../skia/pathStrategy";
+import { makePdfImageResolver } from "./pdfImageAdapter";
 
 let CKPdf: CanvasKitPDF | null = null;
 
@@ -62,7 +63,13 @@ export async function exportScenePdf(
   const doc = CK.MakePDFDocument({ title: "Scene Export", _rootTag: null });
   const canvas = doc.beginPage(width, height);
   canvas.clear(CK.Color4f(1, 1, 1, 1));
-  renderContainer(CK, canvas, contentLayer, makeBuilderStrategy(CK));
+  renderContainer(
+    CK,
+    canvas,
+    contentLayer,
+    makePathStrategy(CK),
+    makePdfImageResolver(),
+  );
   doc.endPage();
   const bytes = doc.close();
   doc.delete();

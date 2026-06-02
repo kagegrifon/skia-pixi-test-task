@@ -2,12 +2,18 @@ import type { Canvas, CanvasKit } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 import { getSpriteImage } from "./spriteImageCache";
 
+export type SpriteImageResolver = (
+  CK: CanvasKit,
+  sprite: PIXI.Sprite,
+) => import("canvaskit-wasm").Image | null;
+
 export function renderSprite(
   CK: CanvasKit,
   canvas: Canvas,
   sprite: PIXI.Sprite,
+  resolveImage: SpriteImageResolver = getSpriteImage,
 ): void {
-  const img = getSpriteImage(CK, sprite);
+  const img = resolveImage(CK, sprite);
   if (!img) return;
 
   // worldTransform уже включает sprite.scale, поэтому рисуем по натуральным

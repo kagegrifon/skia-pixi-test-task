@@ -44,3 +44,40 @@ export function makeBuilderStrategy(ck: CanvasKit): PathStrategy {
   };
 }
 
+// Стратегия на ck.Path — присутствует в обеих сборках CanvasKit, включая
+// урезанную canvaskit-pdf.js, где нет PathBuilder. Здесь path и есть builder:
+// методы мутируют сам объект, finish() отдаёт его как готовый snapshot.
+export function makePathStrategy(ck: CanvasKit): PathStrategy {
+  return {
+    begin() {
+      const path = new ck.Path();
+      const skiaPath: SkiaPath = {
+        addRect: (rect) => {
+          path.addRect(rect);
+        },
+        addOval: (rect) => {
+          path.addOval(rect);
+        },
+        moveTo: (x, y) => {
+          path.moveTo(x, y);
+        },
+        lineTo: (x, y) => {
+          path.lineTo(x, y);
+        },
+        close: () => {
+          path.close();
+        },
+        finish() {
+          return {
+            path,
+            dispose() {
+              path.delete();
+            },
+          };
+        },
+      };
+      return skiaPath;
+    },
+  };
+}
+
