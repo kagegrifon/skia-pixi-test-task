@@ -52,9 +52,9 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <div className="container">
-          <h1 className="app-header__title">Pixi vs Skia</h1>
+          <h1 className="app-header__title">Pixi to Skia</h1>
           <p className="app-header__subtitle">
-            сравнение рендеринга одной сцены
+            Трансформация из системы pixi в skia
           </p>
         </div>
       </header>
