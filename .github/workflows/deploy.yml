@@ -10,6 +10,19 @@ permissions:
   id-token: write
 
 jobs:
+  # --- Параллельно: линт ---
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  # --- Параллельно: тесты ---
   test:
     runs-on: ubuntu-latest
     steps:
@@ -17,9 +30,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
       - run: npm ci
-      - run: npm test -- --run
+      - run: npm test
 
+  # --- Параллельно: сборка ---
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,14 +42,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
       - run: npm ci
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
+  # --- Деплой: ждёт все проверки; пауза до ручного approve в environment ---
   deploy:
-    needs: [test, build]
+    needs: [lint, test, build]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -42,4 +59,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-
