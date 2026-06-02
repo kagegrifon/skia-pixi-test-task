@@ -13,7 +13,7 @@ export function Controls({
 }) {
   return (
     <>
-      <button className="btn btn--accent" onClick={onAddRandom}>
+      <button className="btn" onClick={onAddRandom}>
         Добавить фигуру
       </button>
       <button className="btn" onClick={onChangeScene} disabled={isLoadingScene}>
