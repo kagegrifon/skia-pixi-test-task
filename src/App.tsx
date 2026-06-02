@@ -14,8 +14,13 @@ import {
 import "./App.css";
 
 export function App() {
-  const { pixiApp, contentLayer, isLoadingAssets, switchScene, notifySceneChanged } =
-    usePixiApp();
+  const {
+    pixiApp,
+    contentLayer,
+    isLoadingAssets,
+    switchScene,
+    notifySceneChanged,
+  } = usePixiApp();
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const lastEvent = useEventStatus((s) => s.lastEvent);
   const selected = useEventStatus((s) => s.selected);
@@ -46,46 +51,59 @@ export function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-header__title">Pixi vs Skia</h1>
-        <p className="app-header__subtitle">сравнение рендеринга одной сцены</p>
+        <div className="container">
+          <h1 className="app-header__title">Pixi vs Skia</h1>
+          <p className="app-header__subtitle">
+            сравнение рендеринга одной сцены
+          </p>
+        </div>
       </header>
+      <main className="container">
+        <div className="toolbar">
+          <Controls
+            onChangeScene={() => switchScene()}
+            onAddRandom={() => {
+              if (contentLayer) {
+                addRandomShape(contentLayer);
+                notifySceneChanged();
+              }
+            }}
+            onExportPdf={handleExportPdf}
+            isLoadingScene={isLoadingAssets}
+            isExportingPdf={isExportingPdf}
+          />
+        </div>
 
-      <div className="toolbar">
-        <Controls
-          onChangeScene={() => switchScene()}
-          onAddRandom={() => {
-            if (contentLayer) {
-              addRandomShape(contentLayer);
-              notifySceneChanged();
-            }
-          }}
-          onExportPdf={handleExportPdf}
-          isLoadingScene={isLoadingAssets}
-          isExportingPdf={isExportingPdf}
-        />
-      </div>
+        <div className="canvases">
+          <div className="canvas-card">
+            <div className="canvas-card-content">
+              <span className="canvas-card__label canvas-card__label--pixi">
+                Pixi.js
+              </span>
+              <PixiCanvas />
+            </div>
+          </div>
+          <div className="canvas-card">
+            <div className="canvas-card-content">
+              <span className="canvas-card__label canvas-card__label--skia">
+                Skia
+              </span>
+              <SkiaCanvas />
+            </div>
+          </div>
+        </div>
 
-      <div className="canvases">
-        <div className="canvas-card">
-          <span className="canvas-card__label canvas-card__label--pixi">Pixi.js</span>
-          <PixiCanvas />
+        <div className="status">
+          <div className="status-cell">
+            <div className="status-cell__label">Последнее событие</div>
+            <div className="status-cell__value">{lastEvent}</div>
+          </div>
+          <div className="status-cell">
+            <div className="status-cell__label">Выделено</div>
+            <div className="status-cell__value">{selected ?? ""}</div>
+          </div>
         </div>
-        <div className="canvas-card">
-          <span className="canvas-card__label canvas-card__label--skia">Skia</span>
-          <SkiaCanvas />
-        </div>
-      </div>
-
-      <div className="status">
-        <div className="status-cell">
-          <div className="status-cell__label">Последнее событие</div>
-          <div className="status-cell__value">{lastEvent}</div>
-        </div>
-        <div className="status-cell">
-          <div className="status-cell__label">Выделено</div>
-          <div className="status-cell__value">{selected ?? ""}</div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

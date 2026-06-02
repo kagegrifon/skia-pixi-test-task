@@ -6,24 +6,32 @@
   --c-border: #e3e6ea;
 }
 
+* {
+  box-sizing: content-box;
+}
+
 body {
   margin: 0;
   background: var(--c-bg);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   color: #1e2330;
 }
 
-.app {
+.container {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 0 0 24px;
+  padding: 0 24px;
 }
 
 /* Шапка */
 .app-header {
   background: var(--c-dark);
   color: #fff;
-  padding: 16px 24px;
+  padding: 16px 0;
 }
 
 .app-header__title {
@@ -43,9 +51,7 @@ body {
   display: flex;
   gap: 12px;
   align-items: center;
-  background: #fff;
-  border-bottom: 1px solid var(--c-border);
-  padding: 12px 24px;
+  padding: 12px 0;
 }
 
 .btn {
@@ -57,7 +63,10 @@ body {
   background: #fff;
   color: #1e2330;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
 }
 
 .btn:hover:not(:disabled) {
@@ -83,10 +92,18 @@ body {
 .canvases {
   display: flex;
   gap: 16px;
-  padding: 24px;
+  padding: 24px 0;
+  flex-wrap: wrap;
 }
 
 .canvas-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.canvas-card-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -138,7 +155,7 @@ body {
 .status {
   display: flex;
   gap: 16px;
-  padding: 0 24px;
+  padding: 0;
 }
 
 .status-cell {
