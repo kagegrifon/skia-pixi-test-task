@@ -1,5 +1,4 @@
 import type { CanvasKit, Path } from "canvaskit-wasm";
-import type { CanvasKitPDF } from "../pdf/canvaskit-pdf";
 
 export interface SkiaPath {
   addRect(rect: Float32Array): void;
@@ -45,26 +44,3 @@ export function makeBuilderStrategy(ck: CanvasKit): PathStrategy {
   };
 }
 
-export function makePathStrategy(ck: CanvasKitPDF): PathStrategy {
-  return {
-    begin() {
-      const path = new ck.Path();
-      const skiaPath: SkiaPath = {
-        addRect: (rect) => path.addRect(rect),
-        addOval: (rect) => path.addOval(rect),
-        moveTo: (x, y) => path.moveTo(x, y),
-        lineTo: (x, y) => path.lineTo(x, y),
-        close: () => path.close(),
-        finish() {
-          return {
-            path,
-            dispose() {
-              path.delete();
-            },
-          };
-        },
-      };
-      return skiaPath;
-    },
-  };
-}

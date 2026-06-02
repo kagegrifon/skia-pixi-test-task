@@ -1,6 +1,10 @@
 // Stub getContext so Pixi doesn't crash when detecting renderer in jsdom
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
-HTMLCanvasElement.prototype.getContext = function(type: string, ...args: unknown[]) {
+HTMLCanvasElement.prototype.getContext = function (
+  this: HTMLCanvasElement,
+  type: string,
+  ...args: unknown[]
+) {
   if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
     return null;
   }
@@ -15,5 +19,11 @@ HTMLCanvasElement.prototype.getContext = function(type: string, ...args: unknown
       canvas: this,
     } as unknown as CanvasRenderingContext2D;
   }
-  return (originalGetContext as unknown as Function).call(this, type, ...args);
-};
+  return (
+    originalGetContext as unknown as (
+      this: HTMLCanvasElement,
+      type: string,
+      ...args: unknown[]
+    ) => RenderingContext | null
+  ).call(this, type, ...args);
+} as typeof HTMLCanvasElement.prototype.getContext;

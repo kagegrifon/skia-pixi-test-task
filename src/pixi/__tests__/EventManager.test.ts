@@ -103,7 +103,7 @@ describe('hitTest', () => {
   it('пропускает объект с eventMode="none"', () => {
     const container = new PIXI.Container();
     const obj = makeObjWithHitArea(() => true);
-    (obj as any).eventMode = 'none';
+    obj.eventMode = 'none';
     container.addChild(obj);
     expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
   });

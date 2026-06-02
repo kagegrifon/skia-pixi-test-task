@@ -1,8 +1,8 @@
 import type { CanvasKitPDF } from "./canvaskit-pdf";
 import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "../skia/renderScene";
-import { makePathStrategy } from "../skia/pathStrategy";
 import { CANVAS_SIZE } from "../constants";
+import { makeBuilderStrategy } from "../skia/pathStrategy";
 
 let CKPdf: CanvasKitPDF | null = null;
 
@@ -35,7 +35,9 @@ async function initSkiaPdf(): Promise<CanvasKitPDF> {
 }
 
 function downloadBytes(bytes: Uint8Array, filename: string): void {
-  const blob = new Blob([bytes], { type: "application/pdf" });
+  // Копируем в свежий ArrayBuffer: тип Uint8Array допускает SharedArrayBuffer,
+  // который не является валидным BlobPart.
+  const blob = new Blob([bytes.slice()], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -60,10 +62,11 @@ export async function exportScenePdf(
   const doc = CK.MakePDFDocument({ title: "Scene Export", _rootTag: null });
   const canvas = doc.beginPage(width, height);
   canvas.clear(CK.Color4f(1, 1, 1, 1));
-  renderContainer(CK, canvas, contentLayer, makePathStrategy(CK));
+  renderContainer(CK, canvas, contentLayer, makeBuilderStrategy(CK));
   doc.endPage();
   const bytes = doc.close();
   doc.delete();
 
   downloadBytes(bytes, "scene.pdf");
 }
+

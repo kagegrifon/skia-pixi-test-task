@@ -16,6 +16,7 @@ coverage
 /docs
 .superpowers/
 CLAUDE.md
+.claude
 
 # Editor directories and files
 .vscode/*
