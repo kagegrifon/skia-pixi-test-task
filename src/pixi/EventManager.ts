@@ -15,6 +15,13 @@ export function hitsChild(child: PIXI.DisplayObject, point: PIXI.Point): boolean
   return child.getBounds().contains(point.x, point.y);
 }
 
+function isInteractive(obj: PIXI.DisplayObject): boolean {
+  // makeInteractive помечает объект eventMode === "static";
+  // выделять можно только такие элементы.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (obj as any).eventMode === "static";
+}
+
 export function hitTest(
   container: PIXI.Container,
   point: PIXI.Point,
@@ -29,7 +36,7 @@ export function hitTest(
       const hit = hitTest(child, point);
       if (hit) return hit;
     }
-    if (hitsChild(child, point)) return child;
+    if (isInteractive(child) && hitsChild(child, point)) return child;
   }
   return null;
 }

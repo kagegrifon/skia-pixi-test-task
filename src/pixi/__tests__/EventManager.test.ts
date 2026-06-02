@@ -5,6 +5,8 @@ import { hitTest, hitsChild } from '../EventManager';
 function makeObjWithHitArea(contains: (x: number, y: number) => boolean): PIXI.DisplayObject {
   const obj = new PIXI.Graphics() as PIXI.DisplayObject;
   obj.hitArea = { contains };
+  // makeInteractive помечает интерактивные элементы eventMode === "static"
+  obj.eventMode = 'static';
   return obj;
 }
 
@@ -15,6 +17,7 @@ function makeObjWithContainsPoint(
     containsPoint?: (p: PIXI.IPointData) => boolean;
   };
   obj.containsPoint = containsPoint;
+  obj.eventMode = 'static';
   return obj;
 }
 
@@ -108,10 +111,38 @@ describe('hitTest', () => {
     expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
   });
 
-  it('объект без eventMode "none" по-прежнему попадает', () => {
+  it('интерактивный объект (eventMode="static") попадает', () => {
     const container = new PIXI.Container();
     const obj = makeObjWithHitArea(() => true);
     container.addChild(obj);
     expect(hitTest(container, new PIXI.Point(0, 0))).toBe(obj);
+  });
+
+  it('не выделяет неинтерактивный контейнер при попадании мимо его детей', () => {
+    const container = new PIXI.Container();
+    // контейнер без makeInteractive — дефолтный eventMode, не "static"
+    const sub = new PIXI.Container();
+    const leaf = makeObjWithHitArea(() => false); // клик мимо ребёнка
+    sub.addChild(leaf);
+    container.addChild(sub);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
+  });
+
+  it('не выделяет неинтерактивный объект даже при попадании', () => {
+    const container = new PIXI.Container();
+    const obj = makeObjWithHitArea(() => true);
+    // снимаем пометку интерактивности
+    obj.eventMode = 'auto';
+    container.addChild(obj);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBeNull();
+  });
+
+  it('неинтерактивный контейнер транзитен для интерактивного ребёнка', () => {
+    const container = new PIXI.Container();
+    const sub = new PIXI.Container(); // не интерактивен
+    const leaf = makeObjWithHitArea(() => true); // интерактивен, попадание
+    sub.addChild(leaf);
+    container.addChild(sub);
+    expect(hitTest(container, new PIXI.Point(0, 0))).toBe(leaf);
   });
 });
