@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js-legacy";
 import type { SceneDef } from "../type";
 import { makeInteractive } from "./makeInteractive";
+import { PUBLIC_PATH } from "../constants";
 
 const ASSET_PATH = {
-  cat: "/cat.jpg",
+  cat: `${PUBLIC_PATH}cat.jpg`,
 };
 
 const scene1: SceneDef = {
@@ -147,3 +148,4 @@ const scene3: SceneDef = {
 };
 
 export const scenes = [scene1, scene2, scene3] as const;
+

@@ -1,7 +1,7 @@
 import type { CanvasKitPDF } from "./canvaskit-pdf";
 import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "../skia/renderScene";
-import { CANVAS_SIZE } from "../constants";
+import { CANVAS_SIZE, PUBLIC_PATH } from "../constants";
 import { makePathStrategy } from "../skia/pathStrategy";
 import { makePdfImageResolver } from "./pdfImageAdapter";
 
@@ -23,7 +23,7 @@ async function loadScript(src: string): Promise<void> {
 
 async function initSkiaPdf(): Promise<CanvasKitPDF> {
   if (CKPdf) return CKPdf;
-  await loadScript("/canvaskit/canvaskit-pdf.js");
+  await loadScript(`${PUBLIC_PATH}canvaskit/canvaskit-pdf.js`);
   const init = (
     window as unknown as {
       CanvasKitInit: (opts: {
@@ -31,7 +31,9 @@ async function initSkiaPdf(): Promise<CanvasKitPDF> {
       }) => Promise<CanvasKitPDF>;
     }
   ).CanvasKitInit;
-  CKPdf = await init({ locateFile: () => `/canvaskit/canvaskit-pdf.wasm` });
+  CKPdf = await init({
+    locateFile: () => `${PUBLIC_PATH}canvaskit/canvaskit-pdf.wasm`,
+  });
   return CKPdf;
 }
 

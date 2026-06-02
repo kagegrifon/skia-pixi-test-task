@@ -1,17 +1,14 @@
-import CanvasKitInit, {
-  type CanvasKit,
-  type Surface,
-} from "canvaskit-wasm";
+import CanvasKitInit, { type CanvasKit, type Surface } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 import { renderContainer } from "./renderScene";
 import { makeBuilderStrategy } from "./pathStrategy";
-import { BACKGROUND } from "../constants";
+import { BACKGROUND, PUBLIC_PATH } from "../constants";
 
 let ckPromise: Promise<CanvasKit> | null = null;
 
 function loadCanvasKit(): Promise<CanvasKit> {
   return (ckPromise ??= CanvasKitInit({
-    locateFile: (file) => `/canvaskit/${file}`,
+    locateFile: (file) => `${PUBLIC_PATH}canvaskit/${file}`,
   }));
 }
 
