@@ -44,13 +44,25 @@ export function makeBuilderStrategy(ck: CanvasKit): PathStrategy {
   };
 }
 
+// Мутирующие методы построения пути в рантайме CanvasKit живут прямо на Path
+// (и в полной сборке, и в урезанной canvaskit-pdf.js), но типы canvaskit-wasm
+// объявляют их только на PathBuilder. Описываем недостающую часть здесь и
+// кастуем — обход рассинхрона типов, а не подмена API.
+type MutablePath = Path & {
+  addRect(rect: Float32Array): void;
+  addOval(rect: Float32Array): void;
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  close(): void;
+};
+
 // Стратегия на ck.Path — присутствует в обеих сборках CanvasKit, включая
 // урезанную canvaskit-pdf.js, где нет PathBuilder. Здесь path и есть builder:
 // методы мутируют сам объект, finish() отдаёт его как готовый snapshot.
 export function makePathStrategy(ck: CanvasKit): PathStrategy {
   return {
     begin() {
-      const path = new ck.Path();
+      const path = new ck.Path() as MutablePath;
       const skiaPath: SkiaPath = {
         addRect: (rect) => {
           path.addRect(rect);
