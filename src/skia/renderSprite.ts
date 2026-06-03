@@ -24,10 +24,16 @@ export function renderSprite(
   const ay = -texH * sprite.anchor.y;
 
   const paint = new CK.Paint();
-  canvas.drawImageRect(
+  // AntiAlias сглаживает грани повёрнутого изображения, а FilterMode.Linear —
+  // внутренние пиксели при повороте/масштабе (без него видны «ступеньки»).
+  paint.setAntiAlias(true);
+
+  canvas.drawImageRectOptions(
     img,
     CK.XYWHRect(0, 0, texW, texH),
     CK.XYWHRect(ax, ay, texW, texH),
+    CK.FilterMode.Linear,
+    CK.MipmapMode.None,
     paint,
   );
   paint.delete();
