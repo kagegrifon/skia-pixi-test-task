@@ -1,10 +1,12 @@
 import { readFileSync, writeFileSync } from "fs";
 
-const { default: CanvasKitInit } =
-  await import("../wasm-build/dist/canvaskit-pdf.js");
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const CanvasKitInit = require("../dist/canvaskit-pdf.cjs");
 
 const CanvasKit = await CanvasKitInit({
-  locateFile: (file) => `./wasm-build/dist/${file}`,
+  // locateFile: (file) => `./wasm-build/dist/${file}`,
+  locateFile: () => "./wasm-build/dist/canvaskit-pdf.wasm",
 });
 
 // Проверяем что MakePDFDocument существует

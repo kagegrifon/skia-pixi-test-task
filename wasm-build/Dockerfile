@@ -24,13 +24,14 @@ RUN ./bin/activate-emsdk
 ENV PATH="/skia/third_party/externals/emsdk:/skia/third_party/externals/emsdk/upstream/emscripten:${PATH}"
 WORKDIR /skia/modules/canvaskit
 
-# Фаза B: заменяем build-файлы нашими (с PDF-правками) и копируем биндинг
+# заменяем build-файлы нашими (с PDF-правками) и копируем биндинг
+COPY patch/externs.js ./
 COPY patch/canvaskit.gni ./
 COPY patch/BUILD.gn ./
 COPY patch/compile.sh ./
 
 # Копируем наш C++-биндинг и JS-обёртку
-COPY pdf_bindings.cpp ./
-COPY pdf.js ./
+COPY pdfBindings/pdf_bindings.cpp ./
+COPY pdfBindings/pdf.js ./
 
 RUN ./compile.sh release

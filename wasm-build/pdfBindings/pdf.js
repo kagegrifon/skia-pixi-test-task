@@ -65,10 +65,10 @@ CanvasKit._extraInitializations.push(function () {
     metadata["PDFA"] = !!metadata["PDFA"];
     metadata["compressionLevel"] =
       metadata["compressionLevel"] || CanvasKit.PDFCompressionLevel.Default;
-    if (metadata["rootTag"]) {
-      metadata["_rootTag"] =
-        metadata["_rootTag"] || initPDFTag(metadata["rootTag"]);
-    }
+    metadata["_rootTag"] = metadata["rootTag"]
+      ? metadata["_rootTag"] || initPDFTag(metadata["rootTag"])
+      : null;
+
     return metadata;
   }
 
