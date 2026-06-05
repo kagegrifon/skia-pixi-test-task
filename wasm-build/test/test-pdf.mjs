@@ -1,12 +1,15 @@
 import { readFileSync, writeFileSync } from "fs";
-
+import path from "path";
+import { fileURLToPath } from "url";
 import { createRequire } from "module";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
+
 const CanvasKitInit = require("../dist/canvaskit-pdf.cjs");
 
 const CanvasKit = await CanvasKitInit({
-  // locateFile: (file) => `./wasm-build/dist/${file}`,
-  locateFile: () => "./wasm-build/dist/canvaskit-pdf.wasm",
+  locateFile: () => path.join(__dirname, "../dist/canvaskit-pdf.wasm"),
 });
 
 // Проверяем что MakePDFDocument существует
@@ -30,5 +33,5 @@ doc.delete();
 const header = String.fromCharCode(...bytes.slice(0, 5));
 console.log("PDF header:", header); // должно быть %PDF-
 
-writeFileSync("./wasm-build/test-output.pdf", bytes);
+writeFileSync(path.join(__dirname, "../test-output.pdf"), bytes);
 console.log("Saved test-output.pdf, size:", bytes.length, "bytes");
