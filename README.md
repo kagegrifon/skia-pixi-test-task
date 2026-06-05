@@ -125,7 +125,7 @@ npm run test:cov # тесты с покрытием
 | [src/skia/graphicsData.ts](src/skia/graphicsData.ts) | Извлечение шейпов/стилей из `PIXI.Graphics` |
 | [src/skia/pathStrategy.ts](src/skia/pathStrategy.ts) | Построение `SkPath` (разные стратегии для онскрин- и PDF-сборок) |
 | [src/pdf/exportPdf.ts](src/pdf/exportPdf.ts) | Экспорт сцены в PDF через `canvaskit-pdf.wasm` |
-| [src/pixi/DemoScene.ts](src/pixi/DemoScene.ts) | Демо-сцены с трансформациями и вложенностью |
+| [src/pixi/scenes](src/pixi/scenes/index.ts) | Демо-сцены с трансформациями и вложенностью |
 | [src/pixi/EventManager.ts](src/pixi/EventManager.ts) | События `pointerDown`/`Up` и hit-test для Skia-канваса |
 
 ---

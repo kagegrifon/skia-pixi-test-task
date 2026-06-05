@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js-legacy";
 import { createPixiApp } from "../pixi/createPixiApp";
 import { create } from "zustand";
-import { scenes } from "../pixi/DemoScene";
+import { scenes } from "../pixi/scenes";
 import { SelectionManager } from "../pixi/SelectionManager";
 import { clearSpriteImageCache } from "../skia/spriteImageCache";
 
@@ -38,7 +38,7 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     const contentLayer = new PIXI.Container();
     const overlayLayer = new PIXI.Container();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (overlayLayer as any).eventMode = 'none';
+    (overlayLayer as any).eventMode = "none";
     pixiApp.stage.addChild(contentLayer, overlayLayer);
     const selectionManager = new SelectionManager(overlayLayer, () =>
       get().notifySelectionChanged(),
@@ -99,3 +99,4 @@ export const usePixiApp = create<usePixiAppState>((set, get) => ({
     get().notifySceneChanged();
   },
 }));
+
