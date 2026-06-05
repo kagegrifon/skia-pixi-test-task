@@ -85,7 +85,6 @@ npm run dev      # дев-сервер Vite (http://localhost:5173)
 
 ```bash
 npm run build    # типизация (tsc -b) + продакшн-сборка в dist/
-npm run preview  # локальный просмотр продакшн-сборки
 npm run lint     # eslint
 npm test         # vitest (один прогон)
 npm run test:cov # тесты с покрытием
