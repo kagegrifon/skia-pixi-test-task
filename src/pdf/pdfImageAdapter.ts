@@ -2,20 +2,19 @@ import type { CanvasKit, Image as SkImage } from "canvaskit-wasm";
 import * as PIXI from "pixi.js-legacy";
 import type { SpriteImageResolver } from "../skia/renderSprite";
 
-// КОСТЫЛЬ под текущую сборку canvaskit-pdf.js.
+// Обход апстрим-бага CanvasKit MakeImageFromCanvasImageSource.
 //
-// В этой урезанной сборке CanvasKit.MakeImageFromCanvasImageSource сломан:
-// внутри он вызывает a.MakeImage({...}), но a.MakeImage в этой сборке указывает
-// на перегрузку для ImageFilter, а не на создание SkImage из пикселей. В итоге
-// возвращается невалидный объект → BindingError: Cannot pass "[object Object]"
-// as a sk_sp<Image> при canvas.drawImageRect.
+// Его JS-обёртка вызывает a.MakeImage({width,height,...}) ОДНИМ объектом, а
+// a.MakeImage = function(info, bytes, rowBytes) ждёт байты вторым аргументом и
+// берёт bytes.length → второй аргумент undefined → возвращается невалидный
+// объект → BindingError: Cannot pass "[object Object]" as a sk_sp<Image> при
+// canvas.drawImageRect. Тела этих функций байт-в-байт идентичны в официальном
+// canvaskit-wasm 0.41.1, нашей canvaskit-pdf.js и базовой pushpagarwal — баг в
+// upstream CanvasKit, не в урезанности PDF-сборки. Своя сборка его НЕ устранит.
 //
 // Обходим через MakeImageFromEncoded: рисуем источник на offscreen-canvas,
-// кодируем в PNG (toDataURL) и декодируем штатным _decodeImage. Этот путь в
-// PDF-сборке рабочий.
-//
-// Когда появится собственная полноценная PDF-сборка — этот модуль и передача
-// resolveImage в renderContainer удаляются, остаётся обычный getSpriteImage.
+// кодируем в PNG (toDataURL) и декодируем штатным _decodeImage, минуя сломанную
+// функцию. Работает с любым CanvasKit.
 
 function toCanvasSource(src: unknown): CanvasImageSource | null {
   if (src instanceof HTMLImageElement) return src;

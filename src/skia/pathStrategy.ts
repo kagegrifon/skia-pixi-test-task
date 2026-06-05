@@ -18,6 +18,9 @@ export interface PathStrategy {
   begin(): SkiaPath;
 }
 
+// Стратегия на ck.PathBuilder для онскрин-пути (SkiaRenderer на официальной
+// canvaskit-wasm, где PathBuilder есть). НЕ применять к PDF-сборке
+// canvaskit-pdf.js — там PathBuilder отсутствует, см. makePathStrategy.
 export function makeBuilderStrategy(ck: CanvasKit): PathStrategy {
   return {
     begin() {
@@ -45,9 +48,9 @@ export function makeBuilderStrategy(ck: CanvasKit): PathStrategy {
 }
 
 // Мутирующие методы построения пути в рантайме CanvasKit живут прямо на Path
-// (и в полной сборке, и в урезанной canvaskit-pdf.js), но типы canvaskit-wasm
-// объявляют их только на PathBuilder. Описываем недостающую часть здесь и
-// кастуем — обход рассинхрона типов, а не подмена API.
+// во всех сборках (официальной canvaskit-wasm и нашей PDF-сборке), но типы
+// canvaskit-wasm объявляют их только на PathBuilder. Описываем недостающую
+// часть здесь и кастуем — обход рассинхрона типов, а не подмена API.
 type MutablePath = Path & {
   addRect(rect: Float32Array): void;
   addOval(rect: Float32Array): void;
@@ -56,9 +59,10 @@ type MutablePath = Path & {
   close(): void;
 };
 
-// Стратегия на ck.Path — присутствует в обеих сборках CanvasKit, включая
-// урезанную canvaskit-pdf.js, где нет PathBuilder. Здесь path и есть builder:
-// методы мутируют сам объект, finish() отдаёт его как готовый snapshot.
+// Стратегия на ck.Path для PDF-пути: наша canvaskit-pdf.js НЕ содержит
+// PathBuilder (он есть только в официальной canvaskit-wasm, на которой работает
+// онскрин-путь через makeBuilderStrategy). ck.Path присутствует везде. Здесь
+// path и есть builder: методы мутируют сам объект, finish() отдаёт snapshot.
 export function makePathStrategy(ck: CanvasKit): PathStrategy {
   return {
     begin() {

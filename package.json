@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "wasm-build:start": "bash wasm-build/build.sh",
+    "wasm-build:test": "node wasm-build/test/test-pdf.mjs"
   },
   "dependencies": {
     "canvaskit-wasm": "^0.41.1",
