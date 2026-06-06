@@ -113,20 +113,14 @@ cp wasm-build/dist/canvaskit-pdf.wasm public/canvaskit/canvaskit-pdf.wasm
 
 ## Как происходит сборка:
 
-1. **Окружение:** Создаем Docker (Ubuntu 22.04 в контейнере), python3, git, emsdk 3.1.44.
-2. **Исходники:** Клонируем репозиторий skia: `git clone` Skia → `git checkout bb8c36fdf...` → `python3 tools/git-sync-deps`
-   (с ретраями: Google ограничивает параллельные запросы, делаем в несколько заходов).
-3. **Активация Emscripten:** `./bin/activate-emsdk` (Skia сама тянет нужную версию emsdk).
-4. **Проблема, которую решает PDF-бэкенд:** стоковый `canvaskit-wasm` не экспонирует
-   `SkPDF` в JS — сам бэкенд в исходниках есть, но не прокинут в JavaScript.
-5. **Изменения:** добавил `modules/canvaskit/pdf_bindings.cpp` (обёртка над
-   `SkPDF::MakeDocument`, отдаёт PDF как `Uint8Array`/`ArrayBuffer`); зарегистрировал
-   его в `BUILD.gn`; включил `//src/pdf` через GN-флаги `skia_enable_pdf=true` и
-   `skia_canvaskit_enable_pdf=true`. Опирался на референс `pushpagarwal:canvas-kit-pdf`.
-6. **Сборка:** `./compile.sh release` в Docker (десятки минут).
-7. **Артефакт:** `canvaskit-pdf.wasm` (~9.3 МБ) + `canvaskit-pdf.cjs` (~134 КБ).
-8. **Проверка:** Node-скрипт рисует прямоугольник, `MakePDFDocument → beginPage →
-   close()` возвращает непустой `Uint8Array`, начинающийся с байтов `%PDF-`.
+1. Создаем Docker (Ubuntu 22.04 в контейнере), python3, git, emsdk 3.1.44.
+2. Клонируем репозиторий skia: `git clone` Skia → `git checkout bb8c36fdf...` → `python3 tools/git-sync-deps` (с ретраями: Google ограничивает параллельные запросы, делаем в несколько заходов).
+3. Активация Emscripten: `./bin/activate-emsdk` (Skia сама тянет нужную версию emsdk).
+4. Добавляем  свои файлы для биндинга (`pdf_bindings.cpp`) (обёртка над `SkPDF::MakeDocument`, отдаёт PDF как `Uint8Array/ArrayBuffer`); зарегистрировал его в `BUILD.gn`; включил через GN-флаги `skia_enable_pdf=true` и `skia_canvaskit_enable_pdf=true`. Так же изменяем некоторые файлы для интеграции биндигов в сборку. Опирался на референс `pushpagarwal:canvas-kit-pdf`.
+5. Сборка: `./compile.sh release` в Docker. Получаемый артефакт:
+`canvaskit-pdf.wasm` (~9.3 МБ) + `canvaskit-pdf.cjs` (~134 КБ).
+1.  Тестовая проверка сборки: Node-скрипт рисует прямоугольник, `MakePDFDocument → beginPage → close()` возвращает непустой `Uint8Array`, начинающийся с байтов `%PDF-`.
+
 
 ### Подводные камни
 
@@ -175,9 +169,9 @@ cp wasm-build/dist/canvaskit-pdf.wasm public/canvaskit/canvaskit-pdf.wasm
 | Онскрин-рендер | официальный `canvaskit-wasm` (npm) | `SkiaRenderer.ts` (`CanvasKitInit`) | `makeBuilderStrategy` (на `ck.PathBuilder`) |
 | PDF-экспорт | **своя кастомная сборка** `canvaskit-pdf.js` | `exportPdf.ts` | `makePathStrategy` (на `ck.Path`) |
 
-Сборки различаются по API, и из-за этого две части кода используют **разные**
+Сборки различаются по API, и из-за этого две части кода используют разные
 стратегии построения пути. `ck.PathBuilder` есть в официальной сборке (32 вхождения),
-но **отсутствует** в кастомной PDF-сборке и в референсе `pushpagarwal`. `ck.Path` есть везде,
+но отсутствует в кастомной PDF-сборке и в референсе `pushpagarwal`. `ck.Path` есть везде,
 поэтому применять онскрин-стратегию к PDF-сборке нельзя — будет
 `ck.PathBuilder is not a constructor`. Обе стратегии живут в `src/skia/pathStrategy.ts`
 с комментариями, какая для какой сборки.
