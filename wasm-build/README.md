@@ -4,7 +4,7 @@
 PDF-бэкендом (`SkPDF`). Стандартный npm-пакет `canvaskit-wasm` PDF в JS не отдаёт:
 в его `canvaskit_bindings.cpp` нет биндингов к `SkPDF`/`SkDocument::MakePDF`. Здесь мы
 добавляем свой Emscripten-биндинг (`pdf_bindings.cpp`) и пересобираем Skia в Docker. 
-Был найден похожий случай и использован в качестве референса.
+Нашел похожий случай и использовал его в качестве референса.
 
 ### Референс
 
@@ -41,20 +41,20 @@ CanvasKit.MakePDFDocument(metadata?): PDFDocument
 | Emscripten (`emsdk`) | 3.1.44 |
 | Skia (пин-коммит) | `bb8c36fdf7b915a8c096e35e2f08109e477fe1b8` (2025-07-22) |
 
-Версия emsdk скачивается самой Skia через `./bin/activate-emsdk` — мы её не выбираем,
+Версия emsdk скачивается самой Skia через `./bin/activate-emsdk`,
 она привязана к пин-коммиту Skia. Пин Skia выбран по версии, на которой основан
-референс-патч `pushpagarwal:canvas-kit-pdf`, — чтобы чужой C++ «просто собирался».
+референс-патч `pushpagarwal:canvas-kit-pdf`, — потому что на другой версии референсом было бы сложнее воспользоваться (скомпилировать C++).
 
 ## Структура папки
 
 ```
 wasm-build/
   Dockerfile          # воспроизводимый рецепт: Ubuntu + deps + Skia(пин) + emsdk + сборка
-  build.sh            # docker build + docker cp артефакта в dist/ (в public/ НЕ копирует)
+  build.sh            # docker build + docker cp артефакта в dist/
   pdfBinginds/        # файлы для биндинга методов для создания pdf
-    pdf_bindings.cpp  # наш C++-мостик SkPDF → JS (по образцу pushpagarwal)
+    pdf_bindings.cpp  # C++-мостик SkPDF → JS (по образцу pushpagarwal)
     pdf.js            # JS-обёртка: оборачивает embind _MakePDFDocument → MakePDFDocument
-  patch/              # build-файлы Skia, заменяемые нашими (с PDF-правками):
+  patch/              # build-файлы Skia, заменяемые обновленными (с PDF-правками):
     BUILD.gn          #   — добавляет pdf_bindings.cpp в sources, pdf.js в --pre-js, CK_INCLUDE_PDF
     canvaskit.gni     #   — declare_args: skia_canvaskit_enable_pdf = true
     compile.sh        #   — GN-аргументы: skia_enable_pdf=true, skia_canvaskit_enable_pdf=true
@@ -73,11 +73,11 @@ wasm-build/
 ```bash
 npm run wasm-build:start
 ```
-(запустит `bash wasm-build/build.sh`)
+(команда запустит `bash wasm-build/build.sh`)
 
 Скрипт: `docker build` образа → запуск временного контейнера → `docker cp`
 артефакта из `/skia/out/canvaskit_wasm/` → переименование в `canvaskit-pdf.{cjs,wasm}`
-→ `dist/`. Первая сборка может занять много времени часы и может занять ~15–20 ГБ диска (clone Skia + `git-sync-deps` тянет third_party).
+→ `dist/`. Первая сборка может занять много времени (~час) и может занять ~15–20 ГБ диска (clone Skia + `git-sync-deps` тянет third_party).
 Последующие — минуты: тяжёлые слои кэшируются Docker, пересобирается только слой
 компиляции при правке `pdf_bindings.cpp` / `pdf.js` / `patch/*`.
 
@@ -86,7 +86,7 @@ npm run wasm-build:start
 ```bash
 npm run wasm-build:test
 ```
-(запустит `node wasm-build/test-pdf.mjs`)
+(команда запустит `node wasm-build/test-pdf.mjs`)
 
 Ожидаемый вывод:
 
@@ -98,7 +98,7 @@ Saved test-output.pdf, size: 768 bytes
 
 ## Копирование в проект (вручную)
 
-`build.sh` намеренно **не** трогает `public/`. Когда артефакт признан годным копируем в `/dist`:
+`build.sh` намеренно **не** копирует в `public/`. Когда артефакт признан годным копируем в `/dist`:
 
 ```bash
 cp wasm-build/dist/canvaskit-pdf.cjs public/canvaskit/canvaskit-pdf.js
@@ -128,9 +128,9 @@ cp wasm-build/dist/canvaskit-pdf.wasm public/canvaskit/canvaskit-pdf.wasm
 8. **Проверка:** Node-скрипт рисует прямоугольник, `MakePDFDocument → beginPage →
    close()` возвращает непустой `Uint8Array`, начинающийся с байтов `%PDF-`.
 
-### Подводные камни (что реально встретилось)
+### Подводные камни
 
-Путь от «`MakePDFDocument is not a function`» до рабочего PDF выявил пять неочевидных граблей:
+Путь от «`MakePDFDocument is not a function`» до рабочего PDF выявил пять проблем:
 
 1. **Closure Compiler (`--closure=1`) вырезает JS-обёртки.** C++-биндинги попадают в
    `.wasm`, но публичный JS-API из `pdf.js` (он оборачивает embind `_MakePDFDocument`
@@ -170,37 +170,14 @@ cp wasm-build/dist/canvaskit-pdf.wasm public/canvaskit/canvaskit-pdf.wasm
 
 ### Два разных CanvasKit в одном приложении
 
-Ключевой факт, который надо держать в голове при работе с этим проектом:
-
 | Путь | Грузит | Где | Path-стратегия |
 |---|---|---|---|
 | Онскрин-рендер | официальный `canvaskit-wasm` (npm) | `SkiaRenderer.ts` (`CanvasKitInit`) | `makeBuilderStrategy` (на `ck.PathBuilder`) |
-| PDF-экспорт | **наша** `canvaskit-pdf.js` | `exportPdf.ts` | `makePathStrategy` (на `ck.Path`) |
+| PDF-экспорт | **своя кастомная сборка** `canvaskit-pdf.js` | `exportPdf.ts` | `makePathStrategy` (на `ck.Path`) |
 
 Сборки различаются по API, и из-за этого две части кода используют **разные**
 стратегии построения пути. `ck.PathBuilder` есть в официальной сборке (32 вхождения),
-но **отсутствует** в нашей PDF-сборке и в базовой `pushpagarwal`. `ck.Path` есть везде.
-Поэтому применять онскрин-стратегию к PDF-сборке нельзя — будет
+но **отсутствует** в кастомной PDF-сборке и в референсе `pushpagarwal`. `ck.Path` есть везде,
+поэтому применять онскрин-стратегию к PDF-сборке нельзя — будет
 `ck.PathBuilder is not a constructor`. Обе стратегии живут в `src/skia/pathStrategy.ts`
 с комментариями, какая для какой сборки.
-
-### Два обхода относятся к CanvasKit, а НЕ к урезанности нашей сборки
-
-При интеграции проверяли, не являются ли два «костыля» артефактом неполноты PDF-сборки
-(чтобы убрать их, раз сборка теперь своя). Расследование (сравнение тел JS-функций в
-трёх сборках: официальной `canvaskit-wasm` 0.41.1, нашей `canvaskit-pdf.js`, базовой
-`pushpagarwal`) показало — **оба относятся к самому CanvasKit, своя сборка их не
-устраняет, удалять нельзя**:
-
-- **`makePdfImageResolver`** (`src/pdf/pdfImageAdapter.ts`) — обход **апстрим-бага**
-  `MakeImageFromCanvasImageSource`: её обёртка зовёт `MakeImage({...})` одним объектом,
-  а `MakeImage(info, bytes, rowBytes)` ждёт байты вторым аргументом → невалидный объект
-  → `Cannot pass "[object Object]" as a sk_sp<Image>`. Тела идентичны во всех трёх
-  сборках, включая **официальную** → баг в upstream CanvasKit, а не в нашей урезанности.
-  Обход: PNG через offscreen-canvas → `MakeImageFromEncoded`, минуя сломанную функцию.
-
-- **`makePathStrategy` + каст `MutablePath`** (`src/skia/pathStrategy.ts`) — рабочий
-  путь для PDF-сборки (где нет `PathBuilder`), а каст `MutablePath` обходит рассинхрон
-  типов `canvaskit-wasm` (`.d.ts` кладёт методы построения на `PathBuilder`, рантайм —
-  на `Path`). Не временная заглушка.
-
